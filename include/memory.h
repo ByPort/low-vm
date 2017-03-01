@@ -1,0 +1,3 @@
+namespace lowvm {
+  class Memory {};
+}
