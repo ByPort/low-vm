@@ -13,7 +13,7 @@ namespace lowvm {
     lowvm::cell* getPointer();
     void setLength(lowvm::size);
     lowvm::size getLength();
-    lowvm::cell operator [] (lowvm::addr);
+    lowvm::cell& operator [] (lowvm::addr);
   };
 }
 

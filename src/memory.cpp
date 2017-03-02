@@ -21,7 +21,8 @@ lowvm::size lowvm::Memory::getLength()
   return length;
 }
 
-lowvm::cell lowvm::Memory::operator [] (lowvm::addr at)
+lowvm::cell& lowvm::Memory::operator [] (lowvm::addr at)
 {
+  if (at >= length) throw;
   return memory[at];
 }

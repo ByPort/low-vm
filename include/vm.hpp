@@ -22,10 +22,12 @@ namespace lowvm {
   public:
     void step();
     bool isHalted();
-    void incIP(lowvm::size offset);
+    void incIP(lowvm::size offset = 1);
     void setIP(lowvm::addr ip);
+    lowvm::addr getIP();
     void setMemory(Memory* memory);
     Memory& getMemory();
+    void setService(lowvm::cell, std::function<void(lowvm::addr)>);
   };
 }
 
