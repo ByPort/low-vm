@@ -1,54 +1,29 @@
 #ifndef VM_H
 #define VM_H
 
+#include <functional>
+
 #include "isa.hpp"
 #include "memory.hpp"
 
 namespace lowvm {
-  template <typename MemoryType>
   class VM
   {
   private:
     bool halted = false;
-    addr ip = 0;
-    long vmid = 0x10101010;
-    MemoryType memory;
+    lowvm::addr ip = 0;
+    lowvm::cell vmid = 0x10101010;
+    Memory* memory = nullptr;
 
-    long arg(long number)
-    {
-      return memory[ip + number];
-    }
+    lowvm::cell arg(long number);
 
   public:
-    void step()
-    {
-      using namespace lowvm::instructions;
-      switch (arg(0)) {
-        case hlt: {
-          halted = true;
-          break;
-        }
-      }
-    }
-
-    bool isHalted()
-    {
-      return halted;
-    }
-
-    void incIP(long offset)
-    {
-      ip += offset;
-    }
-    void setIP(addr ip)
-    {
-      this->ip = ip;
-    }
-
-    MemoryType& getMemory()
-    {
-      return memory;
-    }
+    void step();
+    bool isHalted();
+    void incIP(long offset);
+    void setIP(lowvm::addr ip);
+    void setMemory(Memory* memory);
+    Memory& getMemory();
   };
 }
 

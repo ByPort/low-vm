@@ -6,11 +6,13 @@
 
 int main() {
   using namespace lowvm::instructions;
-  long memory[] = {
+  lowvm::cell memory[] = {
     hlt, hlt
   };
-  lowvm::VM<lowvm::Memory> vm;
+  lowvm::VM vm;
+  lowvm::Memory memoryUnit;
+  vm.setMemory(&memoryUnit);
   vm.getMemory().setPointer(memory);
-  vm.getMemory().setLength(sizeof(memory) / sizeof(long));
+  vm.getMemory().setLength(sizeof(memory) / sizeof(lowvm::cell));
   do { vm.step(); } while (!vm.isHalted());
 }

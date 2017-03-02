@@ -6,14 +6,14 @@
 namespace lowvm {
   class Memory {
   private:
-    long* memory = nullptr;
+    cell* memory = nullptr;
     long length = 0;
   public:
-    void setPointer(long*);
-    long* getPointer();
+    void setPointer(lowvm::cell*);
+    lowvm::cell* getPointer();
     void setLength(long);
     long getLength();
-    long operator [] (addr);
+    lowvm::cell operator [] (addr);
   };
 }
 

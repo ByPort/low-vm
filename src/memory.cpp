@@ -1,12 +1,12 @@
 #include "memory.hpp"
 #include "isa.hpp"
 
-void lowvm::Memory::setPointer(long* pointer)
+void lowvm::Memory::setPointer(lowvm::cell* pointer)
 {
   memory = pointer;
 }
 
-long* lowvm::Memory::getPointer()
+lowvm::cell* lowvm::Memory::getPointer()
 {
   return memory;
 }
@@ -21,7 +21,7 @@ long lowvm::Memory::getLength()
   return length;
 }
 
-long lowvm::Memory::operator [] (addr at)
+lowvm::cell lowvm::Memory::operator [] (addr at)
 {
   return memory[at];
 }
