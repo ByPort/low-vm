@@ -11,17 +11,17 @@ lowvm::cell* lowvm::Memory::getPointer()
   return memory;
 }
 
-void lowvm::Memory::setLength(long length)
+void lowvm::Memory::setLength(lowvm::size length)
 {
   this->length = length;
 }
 
-long lowvm::Memory::getLength()
+lowvm::size lowvm::Memory::getLength()
 {
   return length;
 }
 
-lowvm::cell lowvm::Memory::operator [] (addr at)
+lowvm::cell lowvm::Memory::operator [] (lowvm::addr at)
 {
   return memory[at];
 }

@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "isa.hpp"
 #include "vm.hpp"
 #include "memory.hpp"

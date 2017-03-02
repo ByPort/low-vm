@@ -7,13 +7,13 @@ namespace lowvm {
   class Memory {
   private:
     cell* memory = nullptr;
-    long length = 0;
+    lowvm::size length = 0;
   public:
     void setPointer(lowvm::cell*);
     lowvm::cell* getPointer();
-    void setLength(long);
-    long getLength();
-    lowvm::cell operator [] (addr);
+    void setLength(lowvm::size);
+    lowvm::size getLength();
+    lowvm::cell operator [] (lowvm::addr);
   };
 }
 

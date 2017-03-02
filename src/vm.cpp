@@ -2,7 +2,7 @@
 #include "isa.hpp"
 #include "memory.hpp"
 
-lowvm::cell lowvm::VM::arg(long number)
+lowvm::cell lowvm::VM::arg(lowvm::size number)
 {
   return (*memory)[ip + number];
 }
@@ -12,7 +12,7 @@ bool lowvm::VM::isHalted()
   return halted;
 }
 
-void lowvm::VM::incIP(long offset)
+void lowvm::VM::incIP(lowvm::size offset)
 {
   ip += offset;
 }
