@@ -1,118 +1,137 @@
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <functional>
+
 #include "vm.hpp"
 #include "isa.hpp"
 #include "memory.hpp"
 
-lowvm::cell lowvm::VM::arg(lowvm::size number)
+lowvm::VM::VM(MU& memory_unit)
+  : memory_unit(memory_unit)
+  , ip(memory_unit[1])
+  , sp(memory_unit[2])
 {
-  return (*memory)[ip + number];
+  setService(0, std::bind(&MU::service, &memory_unit, std::placeholders::_1));
+  std::clog << "VM: created" << std::endl;
 }
 
-bool lowvm::VM::isHalted()
-{
-  return halted;
+lowvm::MU& lowvm::VM::getMU() {
+  return memory_unit;
 }
 
-void lowvm::VM::incIP(lowvm::size offset)
-{
-  ip += offset;
-}
-void lowvm::VM::setIP(lowvm::addr ip)
-{
-  this->ip = ip;
+lowvm::cell& lowvm::VM::arg(size number) {
+  return memory_unit[ip + number];
 }
 
-void lowvm::VM::setMemory(lowvm::Memory* memory)
-{
-  this->memory = memory;
-}
-
-lowvm::Memory& lowvm::VM::getMemory()
-{
-  return *memory;
-}
-
-void lowvm::VM::setService(lowvm::cell sid, std::function<void(lowvm::addr)> service)
-{
-  services[sid] = service;
-}
-
-lowvm::addr lowvm::VM::getIP()
-{
+lowvm::addr lowvm::VM::getIP() {
   return ip;
 }
 
-void lowvm::VM::step()
-{
+bool lowvm::VM::isHalted() {
+  return halted;
+}
+
+void lowvm::VM::setService(
+  int sid, std::function<void(lowvm::addr service_header)> service
+) {
+  if (services.find(sid) != services.end())
+    throw std::invalid_argument(
+      "Service with SID " + std::to_string(sid) + " already exists");
+  services[sid] = service;
+}
+
+void lowvm::VM::step() {
   using namespace lowvm::instructions;
   switch (arg(0)) {
+    case movvv: {
+      memory_unit[arg(2)] = arg(1);
+      ip += 3;
+      break;
+    }
+    case movmv: {
+      memory_unit[arg(2)] = memory_unit[arg(1)];
+      ip += 3;
+      break;
+    }
     case movvm: {
-      (*memory)[arg(2)] = arg(1);
-      incIP(3);
+      memory_unit[memory_unit[arg(2)]] = arg(1);
+      ip += 3;
       break;
     }
     case movmm: {
-      (*memory)[arg(2)] = (*memory)[arg(1)];
-      incIP(3);
+      memory_unit[memory_unit[arg(2)]] = memory_unit[arg(1)];
+      ip += 3;
       break;
     }
-    case addvm: {
-      (*memory)[arg(2)] += arg(1);
-      incIP(3);
+    case addvv: {
+      memory_unit[arg(2)] += arg(1);
+      ip += 3;
+      break;
+    }
+    case addmv: {
+      memory_unit[arg(2)] += memory_unit[arg(1)];
+      ip += 3;
       break;
     }
     case addmm: {
-      (*memory)[arg(2)] += (*memory)[arg(1)];
-      incIP(3);
+      memory_unit[memory_unit[arg(2)]] += memory_unit[arg(1)];
+      ip += 3;
       break;
     }
-    case mulvm: {
-      (*memory)[arg(2)] *= arg(1);
-      incIP(3);
+    case addvm: {
+      memory_unit[memory_unit[arg(2)]] += arg(1);
+      ip += 3;
       break;
     }
-    case mulmm: {
-      (*memory)[arg(2)] *= (*memory)[arg(1)];
-      incIP(3);
+    case mulvv: {
+      memory_unit[arg(2)] *= arg(1);
+      ip += 3;
       break;
     }
-    case divvm: {
-      (*memory)[arg(2)] /= arg(1);
-      incIP(3);
+    case mulmv: {
+      memory_unit[arg(2)] *= memory_unit[arg(1)];
+      ip += 3;
       break;
     }
-    case divmm: {
-      (*memory)[arg(2)] /= (*memory)[arg(1)];
-      incIP(3);
+    case divvv: {
+      memory_unit[arg(2)] /= arg(1);
+      ip += 3;
       break;
     }
-    case orvm: {
-      (*memory)[arg(2)] |= arg(1);
-      incIP(3);
+    case divmv: {
+      memory_unit[arg(2)] /= memory_unit[arg(1)];
+      ip += 3;
       break;
     }
-    case ormm: {
-      (*memory)[arg(2)] |= (*memory)[arg(1)];
-      incIP(3);
+    case orvv: {
+      memory_unit[arg(2)] |= arg(1);
+      ip += 3;
       break;
     }
-    case andvm: {
-      (*memory)[arg(2)] &= arg(1);
-      incIP(3);
+    case ormv: {
+      memory_unit[arg(2)] |= memory_unit[arg(1)];
+      ip += 3;
       break;
     }
-    case andmm: {
-      (*memory)[arg(2)] &= (*memory)[arg(1)];
-      incIP(3);
+    case andvv: {
+      memory_unit[arg(2)] &= arg(1);
+      ip += 3;
       break;
     }
-    case xorvm: {
-      (*memory)[arg(2)] ^= arg(1);
-      incIP(3);
+    case andmv: {
+      memory_unit[arg(2)] &= memory_unit[arg(1)];
+      ip += 3;
       break;
     }
-    case xormm: {
-      (*memory)[arg(2)] ^= (*memory)[arg(1)];
-      incIP(3);
+    case xorvv: {
+      memory_unit[arg(2)] ^= arg(1);
+      ip += 3;
+      break;
+    }
+    case xormv: {
+      memory_unit[arg(2)] ^= memory_unit[arg(1)];
+      ip += 3;
       break;
     }
     case jmpv: {
@@ -120,32 +139,46 @@ void lowvm::VM::step()
       break;
     }
     case jmpm: {
-      ip = (*memory)[arg(1)];
+      ip = memory_unit[arg(1)];
       break;
     }
     case hlt: {
       halted = true;
-      incIP(1);
+      ip += 1;
       break;
     }
     case nop: {
-      incIP(1);
+      ip += 1;
       break;
     }
-    case jzmv: {
-      if ((*memory)[arg(1)] == 0) ip = arg(2);
-      else incIP(3);
+    case jzvm: {
+      if (memory_unit[arg(2)] == 0)
+        ip = arg(1);
+      else
+        ip += 3;
       break;
     }
     case jzmm: {
-      if ((*memory)[arg(1)] == 0) ip = (*memory)[arg(2)];
-      else incIP(3);
+      if (memory_unit[arg(2)] == 0)
+        ip = memory_unit[arg(1)];
+      else
+        ip += 3;
       break;
     }
     case intv: {
-      services[(*memory)[arg(1)]](arg(1));
-      incIP(2);
+      services[memory_unit[arg(1)]](arg(1));
+      ip += 2;
       break;
+    }
+    case intm: {
+      services[memory_unit[memory_unit[arg(1)]]](memory_unit[arg(1)]);
+      ip += 2;
+      break;
+    }
+    default: {
+      std::stringstream msg;
+      msg << "No instruction with code " << arg(0);
+      throw std::invalid_argument(msg.str());
     }
   }
 }

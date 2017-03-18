@@ -1,28 +1,34 @@
+#include <iostream>
+#include <iomanip>
+#include <stdexcept>
+
 #include "memory.hpp"
 #include "isa.hpp"
 
-void lowvm::Memory::setPointer(lowvm::cell* pointer)
+lowvm::MU::MU(cell*& pointer, size length)
+  : memory(pointer)
+  , length(length)
 {
-  memory = pointer;
+  std::clog << "MU: created" << std::endl;
 }
 
-lowvm::cell* lowvm::Memory::getPointer()
-{
+lowvm::cell* lowvm::MU::getPointer() {
   return memory;
 }
 
-void lowvm::Memory::setLength(lowvm::size length)
-{
-  this->length = length;
-}
-
-lowvm::size lowvm::Memory::getLength()
-{
+lowvm::size lowvm::MU::getLength() {
   return length;
 }
 
-lowvm::cell& lowvm::Memory::operator [] (lowvm::addr at)
-{
-  if (at >= length) throw;
+void lowvm::MU::service(addr service_header) {
+  std::cout << "MU: oh hi there!" << std::endl;
+}
+
+lowvm::cell& lowvm::MU::operator[] (addr at) {
+  if (at >= length) throw std::out_of_range("Address is smaller than size");
+  // std::clog << "MU: Accessing to "
+  // << std::hex << std::setw(8) << std::setfill('0')
+  // << at
+  // << " (=0x" << memory[at] << ")" << std::endl;
   return memory[at];
 }

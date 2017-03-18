@@ -4,48 +4,75 @@
 #include "cstdint"
 
 namespace lowvm {
-  using addr = std::int32_t;
-  using size = addr;
-  using cell = std::int32_t;
+using addr = std::uint32_t;
+using virt = addr;
+using size = std::uint32_t;
+using cell = std::uint32_t;
 
-  namespace instructions {
-    const lowvm::cell mem = 0;
-    const lowvm::cell val = 1;
+namespace instructions {
+  const unsigned int mem = 0;
+  const unsigned int val = 1;
 
-    const lowvm::cell nop  = 0x0;
-    const lowvm::cell _mov = 0x1;
-    const lowvm::cell _add = 0x2;
-    const lowvm::cell _mul = 0x3;
-    const lowvm::cell _div = 0x4;
-    const lowvm::cell _or  = 0x5;
-    const lowvm::cell _and = 0x6;
-    const lowvm::cell _xor = 0x7;
-    const lowvm::cell _jmp = 0x8;
-    const lowvm::cell _jz  = 0x9;
-    const lowvm::cell _int = 0xA;
-    const lowvm::cell hlt  = 0xB;
+  const cell nop = 0x0;
+  const cell hlt = 0x1;
+  const cell itr = 0x2;
 
-    const lowvm::cell movvm = _mov xor ((val << 31) bitor (mem << 30));
-    const lowvm::cell movmm = _mov xor ((mem << 31) bitor (mem << 30));
-    const lowvm::cell addvm = _add xor ((val << 31) bitor (mem << 30));
-    const lowvm::cell addmm = _add xor ((mem << 31) bitor (mem << 30));
-    const lowvm::cell mulvm = _mul xor ((val << 31) bitor (mem << 30));
-    const lowvm::cell mulmm = _mul xor ((mem << 31) bitor (mem << 30));
-    const lowvm::cell divvm = _div xor ((val << 31) bitor (mem << 30));
-    const lowvm::cell divmm = _div xor ((mem << 31) bitor (mem << 30));
-    const lowvm::cell orvm  = _or  xor ((val << 31) bitor (mem << 30));
-    const lowvm::cell ormm  = _or  xor ((mem << 31) bitor (mem << 30));
-    const lowvm::cell andvm = _and xor ((val << 31) bitor (mem << 30));
-    const lowvm::cell andmm = _and xor ((mem << 31) bitor (mem << 30));
-    const lowvm::cell xorvm = _xor xor ((val << 31) bitor (mem << 30));
-    const lowvm::cell xormm = _xor xor ((mem << 31) bitor (mem << 30));
-    const lowvm::cell jmpv  = _jmp xor  (val << 31);
-    const lowvm::cell jmpm  = _jmp xor  (mem << 31);
-    const lowvm::cell jzmv  = _jz  xor ((mem << 31) bitor (val << 30));
-    const lowvm::cell jzmm  = _jz  xor ((mem << 31) bitor (mem << 30));
-    const lowvm::cell intv  = _int xor  (val << 31);
-    const lowvm::cell intm  = _int xor  (mem << 31);
+  const cell jmp = 0x3;
+  const cell jz  = 0x4;
+
+  const cell mov = 0x5;
+
+  const cell add = 0x6;
+  const cell mul = 0x7;
+  const cell div = 0x8;
+
+  const cell lor  = 0x9;
+  const cell land = 0xA;
+  const cell lxor = 0xB;
+
+  constexpr cell i(cell instruction = nop, unsigned int first = mem, unsigned int second = mem) {
+    return instruction | (first << 31) | (second << 30);
   }
-}
+
+  const cell intv = i(itr, val);  // Interrupt with header at farg addr
+  const cell intm = i(itr, mem);  // Interrupt with header at addr contains at farg addr
+
+  const cell jmpv = i(jmp, val);  // Jump to farg addr
+  const cell jmpm = i(jmp, mem);  // Jump to addr contains at farg addr
+  const cell jzvm = i(jz, val);  // Jump to farg addr if value contains at sarg addr = 0
+  const cell jzmm = i(jz, mem);  // Jump to addr contains at farg addr if value contains at sarg addr = 0
+
+  const cell movvm = i(mov, val);  // Move farg value to addr contains at sarg addr
+  const cell movmm = i(mov, mem);  // Move value contains at farg addr to addr contains at sarg addr
+  const cell movvv = i(mov, val, val);  // Move farg value to sarg addr
+  const cell movmv = i(mov, mem, val);  // Move value contains in farg addr to sarg addr
+
+  const cell addvm = i(add, val);  // Add farg value to value contains at sarg addr and move res to addr contains at sarg addr
+  const cell addmm = i(add, mem);  // Add value contains at farg addr to value contains at sarg addr and move res to addr contains at sarg addr
+  const cell addvv = i(add, val, val);  // Add farg value to value at sarg addr and move res to sarg addr
+  const cell addmv = i(add, mem, val);  // Add value contains at farg addr to value at sarg addr and move res to sarg addr
+  const cell mulvm = i(mul, val);  // Multiply farg value and value contains at sarg addr and move res to addr contains at sarg addr
+  const cell mulmm = i(mul, mem);  // Multiply value contains at farg addr and value contains at sarg addr and move res to addr contains at sarg addr
+  const cell mulvv = i(mul, val, val);  // Multiply farg value and value at sarg addr and move res to sarg addr
+  const cell mulmv = i(mul, mem, val);  // Multiply value contains at farg addr and value at sarg addr and move res to sarg addr
+  const cell divvm = i(div, val);
+  const cell divmm = i(div, mem);
+  const cell divvv = i(div, val, val);
+  const cell divmv = i(div, mem, val);
+
+  const cell orvm = i(lor, val);
+  const cell ormm = i(lor, mem);
+  const cell orvv = i(lor, val, val);
+  const cell ormv = i(lor, mem, val);
+  const cell andvm = i(land, val);
+  const cell andmm = i(land, mem);
+  const cell andvv = i(land, val, val);
+  const cell andmv = i(land, mem, val);
+  const cell xorvm = i(lxor, val);
+  const cell xormm = i(lxor, mem);
+  const cell xorvv = i(lxor, val, val);
+  const cell xormv = i(lxor, mem, val);
+}  // namespace instructions
+}  // namespace lowvm
 
 #endif

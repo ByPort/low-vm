@@ -3,32 +3,32 @@
 
 #include <functional>
 #include <map>
+#include <stack>
 
 #include "isa.hpp"
 #include "memory.hpp"
 
 namespace lowvm {
-  class VM
-  {
-  private:
-    bool halted = false;
-    lowvm::addr ip = 0;
-    lowvm::cell vmid = 0x10101010;
-    Memory* memory = nullptr;
-    std::map<lowvm::cell, std::function<void(lowvm::addr)>> services;
+class VM {
+ public:
+  VM(MU& memory_unit);
 
-    lowvm::cell arg(lowvm::size number);
+  void step();
+  MU& getMU();
+  addr getIP();
+  void setService(int sid, std::function<void(addr service_header)> service);
+  bool isHalted();
 
-  public:
-    void step();
-    bool isHalted();
-    void incIP(lowvm::size offset = 1);
-    void setIP(lowvm::addr ip);
-    lowvm::addr getIP();
-    void setMemory(Memory* memory);
-    Memory& getMemory();
-    void setService(lowvm::cell, std::function<void(lowvm::addr)>);
-  };
-}
+ private:
+  MU& memory_unit;
+  std::map<int, std::function<void(addr service_header)>> services;
+  addr& ip;
+  addr& sp;
+  bool halted = false;
+  std::stack<cell> callstack;
+
+  cell& arg(size number);
+};
+}  // namespace lowvm
 
 #endif
