@@ -9,27 +9,47 @@
 int main() {
   using namespace lowvm::instructions;
 
-  lowvm::cell memory[32] = {
+  lowvm::cell memory[200] = {
     0xffffffff,
-    4,
-    31,
+    20,
+    199,
+    8,
+    0, 0, 0, 0,
+    16,
+    0, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+    25,
+    80,
     0xffffffff,
+    0xffffffff,
+    intv, 23,
+    hlt,
+    0, 0,
+    0xffffffff,
+    8,
+    79,
+    0xffffffff,
+    0, 0, 0, 0,
     movmm, 1, 2,
     addvm, 8, 2,
-    jmpv, 13,  // p1
+    jmpv, 17,
     hlt,
-    addvv, (lowvm::cell)-1, 2,  // p1
-    intv, 26,
+    addvv, (lowvm::cell)-1, 2,
+    nop,
+    nop,
+    movvm, (lowvm::cell)-70, 2,
+    addmm, 2, 2,
+    jzvm, 39, 2,
+    movmm, 1, 2,
+    addvm, 8, 2,
+    jmpv, 17,
     addvv, 1, 2,
-    movmv, 2, 25,
+    movmv, 2, 46,
     jmpm, 0xffffffff,
-    0,
   };
   lowvm::cell* memptr = memory;
 
   lowvm::MU memory_unit(memptr, sizeof(memory) / sizeof(memory[0]));
   lowvm::VM vm(memory_unit);
-
   std::cout << std::hex;
   do {
     std::cout << " IP: " << std::setw(8) << std::setfill('0')

@@ -3,11 +3,14 @@ CXXFLAGS = -std=c++14 -Wall
 INCLUDES = -I../include
 OBJECTS = ../src/*.o
 
-all: general
+all: recursive-call mem-mapping
 
-general:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c general.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJECTS) general.o -o general
+recursive-call:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c recursive-call.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJECTS) recursive-call.o -o recursive-call
+mem-mapping:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c mem-mapping.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJECTS) mem-mapping.o -o mem-mapping
 
 clean:
 	rm *.o
