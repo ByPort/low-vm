@@ -4,10 +4,10 @@
 #include "cstdint"
 
 namespace lowvm {
-using addr = std::uint32_t;
-using virt = addr;
-using size = std::uint32_t;
-using cell = std::uint32_t;
+  using addr = std::uint32_t;
+  using virt = addr;
+  using size = std::uint32_t;
+  using cell = std::uint32_t;
 
 namespace instructions {
   const unsigned int mem = 0;
@@ -39,8 +39,10 @@ namespace instructions {
 
   const cell jmpv = i(jmp, val);  // Jump to farg addr
   const cell jmpm = i(jmp, mem);  // Jump to addr contains at farg addr
-  const cell jzvm = i(jz, val);  // Jump to farg addr if value contains at sarg addr = 0
-  const cell jzmm = i(jz, mem);  // Jump to addr contains at farg addr if value contains at sarg addr = 0
+  const cell jzvm = i(jz, val);  // Jump to farg addr if value at addr contains at sarg addr = 0
+  const cell jzmm = i(jz, mem);  // Jump to addr contains at farg addr if value at addr contains at sarg addr = 0
+  const cell jzvv = i(jz, val, val);  // Jump to farg addr if value contains at sarg addr = 0
+  const cell jzmv = i(jz, mem, val);  // Jump to addr contains at farg addr if value contains at sarg addr = 0
 
   const cell movvm = i(mov, val);  // Move farg value to addr contains at sarg addr
   const cell movmm = i(mov, mem);  // Move value contains at farg addr to addr contains at sarg addr

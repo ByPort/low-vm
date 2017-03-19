@@ -9,8 +9,6 @@
 
 lowvm::VM::VM(MU& memory_unit)
   : memory_unit(memory_unit)
-  , ip(memory_unit[1])
-  , sp(memory_unit[2])
 {
   setService(0, std::bind(&MU::service, &memory_unit, std::placeholders::_1));
   std::clog << "VM: created" << std::endl;
@@ -21,11 +19,19 @@ lowvm::MU& lowvm::VM::getMU() {
 }
 
 lowvm::cell& lowvm::VM::arg(size number) {
-  return memory_unit[ip + number];
+  return memory_unit[ip() + number];
 }
 
 lowvm::addr lowvm::VM::getIP() {
-  return ip;
+  return ip();
+}
+
+lowvm::addr& lowvm::VM::ip() {
+  return memory_unit[1];
+}
+
+lowvm::addr& lowvm::VM::sp() {
+  return memory_unit[2];
 }
 
 bool lowvm::VM::isHalted() {
@@ -46,133 +52,147 @@ void lowvm::VM::step() {
   switch (arg(0)) {
     case movvv: {
       memory_unit[arg(2)] = arg(1);
-      ip += 3;
+      ip() += 3;
       break;
     }
     case movmv: {
       memory_unit[arg(2)] = memory_unit[arg(1)];
-      ip += 3;
+      ip() += 3;
       break;
     }
     case movvm: {
       memory_unit[memory_unit[arg(2)]] = arg(1);
-      ip += 3;
+      ip() += 3;
       break;
     }
     case movmm: {
       memory_unit[memory_unit[arg(2)]] = memory_unit[arg(1)];
-      ip += 3;
+      ip() += 3;
       break;
     }
     case addvv: {
       memory_unit[arg(2)] += arg(1);
-      ip += 3;
+      ip() += 3;
       break;
     }
     case addmv: {
       memory_unit[arg(2)] += memory_unit[arg(1)];
-      ip += 3;
+      ip() += 3;
       break;
     }
     case addmm: {
       memory_unit[memory_unit[arg(2)]] += memory_unit[arg(1)];
-      ip += 3;
+      ip() += 3;
       break;
     }
     case addvm: {
       memory_unit[memory_unit[arg(2)]] += arg(1);
-      ip += 3;
+      ip() += 3;
       break;
     }
     case mulvv: {
       memory_unit[arg(2)] *= arg(1);
-      ip += 3;
+      ip() += 3;
       break;
     }
     case mulmv: {
       memory_unit[arg(2)] *= memory_unit[arg(1)];
-      ip += 3;
+      ip() += 3;
       break;
     }
     case divvv: {
       memory_unit[arg(2)] /= arg(1);
-      ip += 3;
+      ip() += 3;
       break;
     }
     case divmv: {
       memory_unit[arg(2)] /= memory_unit[arg(1)];
-      ip += 3;
+      ip() += 3;
       break;
     }
     case orvv: {
       memory_unit[arg(2)] |= arg(1);
-      ip += 3;
+      ip() += 3;
       break;
     }
     case ormv: {
       memory_unit[arg(2)] |= memory_unit[arg(1)];
-      ip += 3;
+      ip() += 3;
       break;
     }
     case andvv: {
       memory_unit[arg(2)] &= arg(1);
-      ip += 3;
+      ip() += 3;
       break;
     }
     case andmv: {
       memory_unit[arg(2)] &= memory_unit[arg(1)];
-      ip += 3;
+      ip() += 3;
       break;
     }
     case xorvv: {
       memory_unit[arg(2)] ^= arg(1);
-      ip += 3;
+      ip() += 3;
       break;
     }
     case xormv: {
       memory_unit[arg(2)] ^= memory_unit[arg(1)];
-      ip += 3;
+      ip() += 3;
       break;
     }
     case jmpv: {
-      ip = arg(1);
+      ip() = arg(1);
       break;
     }
     case jmpm: {
-      ip = memory_unit[arg(1)];
+      ip() = memory_unit[arg(1)];
       break;
     }
     case hlt: {
       halted = true;
-      ip += 1;
+      ip() += 1;
       break;
     }
     case nop: {
-      ip += 1;
+      ip() += 1;
       break;
     }
     case jzvm: {
-      if (memory_unit[arg(2)] == 0)
-        ip = arg(1);
+      if (memory_unit[memory_unit[arg(2)]] == 0)
+        ip() = arg(1);
       else
-        ip += 3;
+        ip() += 3;
       break;
     }
     case jzmm: {
-      if (memory_unit[arg(2)] == 0)
-        ip = memory_unit[arg(1)];
+      if (memory_unit[memory_unit[arg(2)]] == 0)
+        ip() = memory_unit[arg(1)];
       else
-        ip += 3;
+        ip() += 3;
+      break;
+    }
+    case jzvv: {
+      if (memory_unit[arg(2)] == 0)
+        ip() = arg(1);
+      else
+        ip() += 3;
+      break;
+    }
+    case jzmv: {
+      if (memory_unit[arg(2)] == 0)
+        ip() = memory_unit[arg(1)];
+      else
+        ip() += 3;
       break;
     }
     case intv: {
       services[memory_unit[arg(1)]](arg(1));
-      ip += 2;
+      ip() += 2;
       break;
     }
     case intm: {
       services[memory_unit[memory_unit[arg(1)]]](memory_unit[arg(1)]);
-      ip += 2;
+      ip() += 2;
       break;
     }
     default: {
