@@ -1,15 +1,12 @@
-#include <iostream>
-#include <iomanip>
 #include <stdexcept>
 
-#include "memory.hpp"
-#include "isa.hpp"
+#include <memory.hpp>
+#include <isa.hpp>
 
 lowvm::MU::MU(cell*& pointer, size length)
   : memory(pointer)
 {
   active_segments.push_back(SegRecord(0, length, 0));
-  std::clog << "MU: created" << std::endl;
 }
 
 lowvm::cell* lowvm::MU::getPointer() {
@@ -20,7 +17,7 @@ lowvm::size lowvm::MU::getLength() {
   return active_segments.back().length;
 }
 
-void lowvm::MU::service(addr service_header) {
+void lowvm::MU::operator()(addr service_header) {
   switch ((*this)[service_header]) {
     case 0: {
       addr base;
@@ -49,7 +46,7 @@ void lowvm::MU::service(addr service_header) {
   }
 }
 
-lowvm::addr lowvm::MU::abs(addr virtual_address, int seg) {
+lowvm::addr lowvm::MU::abs_addr(addr virtual_address, int seg) {
   for (
     int i = active_segments.size() - 1;
     i >= static_cast<int>(active_segments.size()) - 1 - seg;
@@ -63,9 +60,5 @@ lowvm::addr lowvm::MU::abs(addr virtual_address, int seg) {
 lowvm::cell& lowvm::MU::operator[] (addr at) {
   if (at >= active_segments.back().length)
     throw std::out_of_range("Address is smaller than size");
-  // std::clog << "MU: Accessing to "
-  // << std::hex << std::setw(8) << std::setfill('0')
-  // << at
-  // << " (=0x" << memory[abs(at, active_segments.size() - 1)] << ")" << std::endl;
-  return memory[abs(at, active_segments.size() - 1)];
+  return memory[abs_addr(at, active_segments.size() - 1)];
 }

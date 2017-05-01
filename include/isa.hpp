@@ -1,17 +1,17 @@
 #ifndef ISA_H
 #define ISA_H
 
-#include "cstdint"
+#include <stdint.h>
 
 namespace lowvm {
-  using addr = std::uint32_t;
+  using addr = uint32_t;
   using virt = addr;
-  using size = std::uint32_t;
-  using cell = std::uint32_t;
+  using size = uint32_t;
+  using cell = uint32_t;
 
 namespace instructions {
-  const unsigned int mem = 0;
-  const unsigned int val = 1;
+  const uint32_t mem = 0;
+  const uint32_t val = 1;
 
   const cell nop = 0x0;
   const cell hlt = 0x1;
@@ -30,7 +30,7 @@ namespace instructions {
   const cell land = 0xA;
   const cell lxor = 0xB;
 
-  constexpr cell i(cell instruction = nop, unsigned int first = mem, unsigned int second = mem) {
+  constexpr cell i(cell instruction = nop, uint32_t first = mem, uint32_t second = mem) {
     return instruction | (first << 31) | (second << 30);
   }
 

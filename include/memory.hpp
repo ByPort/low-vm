@@ -1,9 +1,16 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#if defined(__AVR__) || defined(DEBUG_UTIL)
+#include <util/vector.hpp>
+using lowvm::util::vector;
+#else
 #include <vector>
+using std::vector;
+#endif
 
-#include "isa.hpp"
+#include <isa.hpp>
+#include <service.hpp>
 
 namespace lowvm {
 struct SegRecord {
@@ -18,20 +25,20 @@ struct SegRecord {
   {}
 };
 
-class MU {
+class MU : public Service {
  public:
   MU(cell*& pointer, size length);
 
   cell* getPointer();
   size getLength();
   cell& operator[] (addr at);
-  void service(addr service_header);
+  void operator()(addr service_header);
 
  private:
   cell*& memory;
-  std::vector<SegRecord> active_segments;
+  vector<SegRecord> active_segments;
 
-  addr abs(addr virtual_address, int seg = 0);
+  addr abs_addr(addr virtual_address, int seg = 0);
 };
 }  // namespace lowvm
 

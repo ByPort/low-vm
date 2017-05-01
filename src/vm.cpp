@@ -1,17 +1,14 @@
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <functional>
 
-#include "vm.hpp"
-#include "isa.hpp"
-#include "memory.hpp"
+#include <vm.hpp>
+#include <isa.hpp>
+#include <memory.hpp>
 
 lowvm::VM::VM(MU& memory_unit)
   : memory_unit(memory_unit)
 {
-  setService(0, std::bind(&MU::service, &memory_unit, std::placeholders::_1));
-  std::clog << "VM: created" << std::endl;
+  setService(0, &memory_unit);
 }
 
 lowvm::MU& lowvm::VM::getMU() {
@@ -38,9 +35,7 @@ bool lowvm::VM::isHalted() {
   return halted;
 }
 
-void lowvm::VM::setService(
-  int sid, std::function<void(lowvm::addr service_header)> service
-) {
+void lowvm::VM::setService(int sid, lowvm::Service* service) {
   if (services.find(sid) != services.end())
     throw std::invalid_argument(
       "Service with SID " + std::to_string(sid) + " already exists");
@@ -186,12 +181,12 @@ void lowvm::VM::step() {
       break;
     }
     case intv: {
-      services[memory_unit[arg(1)]](arg(1));
+      (*services[memory_unit[arg(1)]])(arg(1));
       ip() += 2;
       break;
     }
     case intm: {
-      services[memory_unit[memory_unit[arg(1)]]](memory_unit[arg(1)]);
+      (*services[memory_unit[memory_unit[arg(1)]]])(memory_unit[arg(1)]);
       ip() += 2;
       break;
     }
