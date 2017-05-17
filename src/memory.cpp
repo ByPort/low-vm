@@ -2,14 +2,13 @@
 #include <iomanip>
 #include <stdexcept>
 
-#include "memory.hpp"
-#include "isa.hpp"
+#include <memory.hpp>
+#include <isa.hpp>
 
 lowvm::MU::MU(cell*& pointer, size length)
   : memory(pointer)
 {
   active_segments.push_back(SegRecord(0, length, 0));
-  std::clog << "MU: created" << std::endl;
 }
 
 lowvm::cell* lowvm::MU::getPointer() {
@@ -20,7 +19,7 @@ lowvm::size lowvm::MU::getLength() {
   return active_segments.back().length;
 }
 
-void lowvm::MU::service(addr service_header) {
+void lowvm::MU::operator()(addr service_header) {
   switch ((*this)[service_header]) {
     case 0: {
       addr base;

@@ -11,5 +11,5 @@ vm:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) vm.cpp
 
 clean:
-	rm *.o
+	find . -type f -name "*.o" -delete
 	find . -type f  ! -name "*.*" ! -name "Makefile" -delete

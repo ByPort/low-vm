@@ -5,8 +5,9 @@
 #include <map>
 #include <stack>
 
-#include "isa.hpp"
-#include "memory.hpp"
+#include <isa.hpp>
+#include <memory.hpp>
+#include <service.hpp>
 
 namespace lowvm {
 class VM {
@@ -16,12 +17,12 @@ class VM {
   void step();
   MU& getMU();
   addr getIP();
-  void setService(int sid, std::function<void(addr service_header)> service);
+  void setService(int sid, Service* service);
   bool isHalted();
 
  private:
   MU& memory_unit;
-  std::map<int, std::function<void(addr service_header)>> services;
+  std::map<int, Service*> services;
   bool halted = false;
   std::stack<cell> callstack;
 

@@ -35,3 +35,4 @@
 # Examples
 examples/*
 !examples/*.cpp
+!examples/Makefile

@@ -5,13 +5,16 @@ OBJECTS = ../src/*.o
 
 all: recursive-call mem-mapping
 
-recursive-call:
+recursive-call: vm
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c recursive-call.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJECTS) recursive-call.o -o recursive-call
-mem-mapping:
+mem-mapping: vm
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c mem-mapping.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJECTS) mem-mapping.o -o mem-mapping
 
+vm:
+	$(MAKE) -C ../src
+
 clean:
-	rm *.o
+	find . -type f -name "*.o" -delete
 	find . -type f  ! -name "*.*" ! -name "Makefile" -delete

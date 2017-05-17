@@ -3,7 +3,8 @@
 
 #include <vector>
 
-#include "isa.hpp"
+#include <isa.hpp>
+#include <service.hpp>
 
 namespace lowvm {
 struct SegRecord {
@@ -18,14 +19,14 @@ struct SegRecord {
   {}
 };
 
-class MU {
+class MU : public Service {
  public:
   MU(cell*& pointer, size length);
 
   cell* getPointer();
   size getLength();
   cell& operator[] (addr at);
-  void service(addr service_header);
+  void operator()(addr service_header);
 
  private:
   cell*& memory;
