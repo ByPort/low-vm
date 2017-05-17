@@ -1,5 +1,6 @@
 #include <sstream>
 #include <stdexcept>
+#include <cmath>
 
 #include <vm.hpp>
 #include <isa.hpp>
@@ -16,8 +17,56 @@ lowvm::MU& lowvm::VM::getMU() {
   return memory_unit;
 }
 
-lowvm::cell& lowvm::VM::arg(size number) {
-  return memory_unit[ip() + number];
+lowvm::instructions::Instruction& lowvm::VM::currentInstruction() {
+  return *static_cast<lowvm::instructions::Instruction*>(static_cast<void*>(&memory_unit.at<std::uint16_t>(ip())));
+}
+
+std::uint64_t lowvm::VM::arg(size number) {
+  switch (number) {
+    case 0: return !currentInstruction().flags.extended
+      ? static_cast<std::uint16_t>(currentInstruction())
+      : *static_cast<std::uint32_t*>(static_cast<ptr>(&currentInstruction()));
+    case 1: switch (currentInstruction().operands.first.size) {
+      case 0: return *static_cast<std::uint8_t*>(
+        static_cast<ptr>(&currentInstruction()) +
+        (!currentInstruction().flags.extended ? 2 : 4)
+      );
+      case 1: return *static_cast<std::uint16_t*>(
+        static_cast<ptr>(&currentInstruction()) +
+        (!currentInstruction().flags.extended ? 2 : 4)
+      );
+      case 2: return *static_cast<std::uint32_t*>(
+        static_cast<ptr>(&currentInstruction()) +
+        (!currentInstruction().flags.extended ? 2 : 4)
+      );
+      case 3: return *static_cast<std::uint64_t*>(
+        static_cast<ptr>(&currentInstruction()) +
+        (!currentInstruction().flags.extended ? 2 : 4)
+      );
+    }
+    case 2: switch (currentInstruction().operands.second.size) {
+      case 0: return *static_cast<std::uint8_t*>(
+        static_cast<ptr>(&currentInstruction()) +
+        (!currentInstruction().flags.extended ? 2 : 4) +
+        static_cast<std::uint32_t>(std::pow(2, currentInstruction().operands.first.size))
+      );
+      case 1: return *static_cast<std::uint16_t*>(
+        static_cast<ptr>(&currentInstruction()) +
+        (!currentInstruction().flags.extended ? 2 : 4) +
+        static_cast<std::uint32_t>(std::pow(2, currentInstruction().operands.first.size))
+      );
+      case 2: return *static_cast<std::uint32_t*>(
+        static_cast<ptr>(&currentInstruction()) +
+        (!currentInstruction().flags.extended ? 2 : 4) +
+        static_cast<std::uint32_t>(std::pow(2, currentInstruction().operands.first.size))
+      );
+      case 3: return *static_cast<std::uint64_t*>(
+        static_cast<ptr>(&currentInstruction()) +
+        (!currentInstruction().flags.extended ? 2 : 4) +
+        static_cast<uint32_t>(std::pow(2, currentInstruction().operands.first.size))
+      );
+    }
+  }
 }
 
 lowvm::addr lowvm::VM::getIP() {
@@ -25,11 +74,11 @@ lowvm::addr lowvm::VM::getIP() {
 }
 
 lowvm::addr& lowvm::VM::ip() {
-  return memory_unit[1];
+  return memory_unit.at<lowvm::addr>(1, true);
 }
 
 lowvm::addr& lowvm::VM::sp() {
-  return memory_unit[2];
+  return memory_unit.at<lowvm::addr>(2, true);
 }
 
 bool lowvm::VM::isHalted() {
@@ -45,11 +94,29 @@ void lowvm::VM::setService(int sid, lowvm::Service* service) {
 
 void lowvm::VM::step() {
   using namespace lowvm::instructions;
+
   switch (arg(0)) {
     case movvv: {
-      memory_unit[arg(2)] = arg(1);
-      ip() += 3;
-      break;
+      switch (currentInstruction().operands.first.size) {
+        case 0: {
+          memory_unit.at<std::uint8_t>(arg(2)) = static_cast<std::uint8_t>(arg(1));
+          break;
+        }
+        case 1: {
+          memory_unit.at<std::uint16_t>(arg(2)) = static_cast<std::uint16_t>(arg(1));
+          break;
+        }
+        case 2: {
+          memory_unit.at<std::uint32_t>(arg(2)) = static_cast<std::uint32_t>(arg(1));
+          break;
+        }
+        case 3: {
+          memory_unit.at<std::uint64_t>(arg(2)) = static_cast<std::uint64_t>(arg(1));
+          break;
+        }
+      }
+      ip() += currentInstruction.totalSize();
+      break; // TODO(byport): here
     }
     case movmv: {
       memory_unit[arg(2)] = memory_unit[arg(1)];

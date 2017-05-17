@@ -2,6 +2,7 @@
 #define VM_H
 
 #include <map>
+#include <cstdint>
 
 #include <isa.hpp>
 #include <memory.hpp>
@@ -23,9 +24,10 @@ class VM {
   std::map<int, Service*> services;
   bool halted = false;
 
-  cell& arg(size number);
+  std::uint64_t arg(size number);
   addr& ip();
   addr& sp();
+  instructions::Instruction& currentInstruction();
 };
 }  // namespace lowvm
 

@@ -1,13 +1,13 @@
 header:
 00000000 __void__
-00000001 ip
-00000002 sp
-00000003 *seglist
-00000004 __reserved__
-00000005 __reserved__
-00000006 __reserved__
-00000007 __reserved__
-
+00000004 ip
+00000008 sp
+0000000C *seglist
+00000010 __reserved__
+00000011 __reserved__
+00000012 __reserved__
+00000013 __reserved__
+---
 seglist:
 +00000000 *segrecord
 +00000001 *segrecord
