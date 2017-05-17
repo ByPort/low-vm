@@ -1,7 +1,5 @@
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <functional>
 
 #include <vm.hpp>
 #include <isa.hpp>
@@ -38,9 +36,7 @@ bool lowvm::VM::isHalted() {
   return halted;
 }
 
-void lowvm::VM::setService(
-  int sid, lowvm::Service* service
-) {
+void lowvm::VM::setService(int sid, lowvm::Service* service) {
   if (services.find(sid) != services.end())
     throw std::invalid_argument(
       "Service with SID " + std::to_string(sid) + " already exists");

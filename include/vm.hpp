@@ -1,9 +1,7 @@
 #ifndef VM_H
 #define VM_H
 
-#include <functional>
 #include <map>
-#include <stack>
 
 #include <isa.hpp>
 #include <memory.hpp>
@@ -24,7 +22,6 @@ class VM {
   MU& memory_unit;
   std::map<int, Service*> services;
   bool halted = false;
-  std::stack<cell> callstack;
 
   cell& arg(size number);
   addr& ip();

@@ -1,5 +1,3 @@
-#include <iostream>
-#include <iomanip>
 #include <stdexcept>
 
 #include <memory.hpp>

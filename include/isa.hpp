@@ -1,7 +1,7 @@
 #ifndef ISA_H
 #define ISA_H
 
-#include "cstdint"
+#include <cstdint>
 
 namespace lowvm {
 using addr = std::uint32_t;
