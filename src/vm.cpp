@@ -6,18 +6,19 @@
 #include <memory.hpp>
 #include <service.hpp>
 
-lowvm::VM::VM(MU& memory_unit)
-  : memory_unit(memory_unit)
-{
-  setService(0, &memory_unit);
+lowvm::VM::VM() {}
+
+lowvm::VM::VM(MU* memory_unit)
+  : memory_unit(memory_unit) {
+  setService(0, memory_unit);
 }
 
 lowvm::MU& lowvm::VM::getMU() {
-  return memory_unit;
+  return *memory_unit;
 }
 
 lowvm::cell& lowvm::VM::arg(size number) {
-  return memory_unit[ip() + number];
+  return (*memory_unit)[ip() + number];
 }
 
 lowvm::addr lowvm::VM::getIP() {
@@ -25,11 +26,11 @@ lowvm::addr lowvm::VM::getIP() {
 }
 
 lowvm::addr& lowvm::VM::ip() {
-  return memory_unit[1];
+  return (*memory_unit)[1];
 }
 
 lowvm::addr& lowvm::VM::sp() {
-  return memory_unit[2];
+  return (*memory_unit)[2];
 }
 
 bool lowvm::VM::isHalted() {
@@ -45,149 +46,151 @@ void lowvm::VM::setService(int sid, lowvm::Service* service) {
 
 void lowvm::VM::step() {
   using namespace lowvm::instructions;
+
   switch (arg(0)) {
-    case movvv: {
-      memory_unit[arg(2)] = arg(1);
+    case MOVVV: {
+      (*memory_unit)[arg(2)] = arg(1);
       ip() += 3;
       break;
     }
-    case movmv: {
-      memory_unit[arg(2)] = memory_unit[arg(1)];
+    case MOVAV: {
+      (*memory_unit)[arg(2)] = (*memory_unit)[arg(1)];
       ip() += 3;
       break;
     }
-    case movvm: {
-      memory_unit[memory_unit[arg(2)]] = arg(1);
+    case MOVVA: {
+      (*memory_unit)[(*memory_unit)[arg(2)]] = arg(1);
       ip() += 3;
       break;
     }
-    case movmm: {
-      memory_unit[memory_unit[arg(2)]] = memory_unit[arg(1)];
+    case MOVAA: {
+      (*memory_unit)[(*memory_unit)[arg(2)]] = (*memory_unit)[arg(1)];
       ip() += 3;
       break;
     }
-    case addvv: {
-      memory_unit[arg(2)] += arg(1);
+    case ADDVV: {
+      (*memory_unit)[arg(2)] += arg(1);
       ip() += 3;
       break;
     }
-    case addmv: {
-      memory_unit[arg(2)] += memory_unit[arg(1)];
+    case ADDAV: {
+      (*memory_unit)[arg(2)] += (*memory_unit)[arg(1)];
       ip() += 3;
       break;
     }
-    case addmm: {
-      memory_unit[memory_unit[arg(2)]] += memory_unit[arg(1)];
+    case ADDAA: {
+      (*memory_unit)[(*memory_unit)[arg(2)]] += (*memory_unit)[arg(1)];
       ip() += 3;
       break;
     }
-    case addvm: {
-      memory_unit[memory_unit[arg(2)]] += arg(1);
+    case ADDVA: {
+      (*memory_unit)[(*memory_unit)[arg(2)]] += arg(1);
       ip() += 3;
       break;
     }
-    case mulvv: {
-      memory_unit[arg(2)] *= arg(1);
+    case MULVV: {
+      (*memory_unit)[arg(2)] *= arg(1);
       ip() += 3;
       break;
     }
-    case mulmv: {
-      memory_unit[arg(2)] *= memory_unit[arg(1)];
+    case MULAV: {
+      (*memory_unit)[arg(2)] *= (*memory_unit)[arg(1)];
       ip() += 3;
       break;
     }
-    case divvv: {
-      memory_unit[arg(2)] /= arg(1);
+    case DIVVV: {
+      (*memory_unit)[arg(2)] /= arg(1);
       ip() += 3;
       break;
     }
-    case divmv: {
-      memory_unit[arg(2)] /= memory_unit[arg(1)];
+    case DIVAV: {
+      (*memory_unit)[arg(2)] /= (*memory_unit)[arg(1)];
       ip() += 3;
       break;
     }
-    case orvv: {
-      memory_unit[arg(2)] |= arg(1);
+    case ORVV: {
+      (*memory_unit)[arg(2)] |= arg(1);
       ip() += 3;
       break;
     }
-    case ormv: {
-      memory_unit[arg(2)] |= memory_unit[arg(1)];
+    case ORAV: {
+      (*memory_unit)[arg(2)] |= (*memory_unit)[arg(1)];
       ip() += 3;
       break;
     }
-    case andvv: {
-      memory_unit[arg(2)] &= arg(1);
+    case ANDVV: {
+      (*memory_unit)[arg(2)] &= arg(1);
       ip() += 3;
       break;
     }
-    case andmv: {
-      memory_unit[arg(2)] &= memory_unit[arg(1)];
+    case ANDAV: {
+      (*memory_unit)[arg(2)] &= (*memory_unit)[arg(1)];
       ip() += 3;
       break;
     }
-    case xorvv: {
-      memory_unit[arg(2)] ^= arg(1);
+    case XORVV: {
+      (*memory_unit)[arg(2)] ^= arg(1);
       ip() += 3;
       break;
     }
-    case xormv: {
-      memory_unit[arg(2)] ^= memory_unit[arg(1)];
+    case XORAV: {
+      (*memory_unit)[arg(2)] ^= (*memory_unit)[arg(1)];
       ip() += 3;
       break;
     }
-    case jmpv: {
+    case JMPV: {
       ip() = arg(1);
       break;
     }
-    case jmpm: {
-      ip() = memory_unit[arg(1)];
+    case JMPA: {
+      ip() = (*memory_unit)[arg(1)];
       break;
     }
-    case hlt: {
+    case HLT: {
       halted = true;
       ip() += 1;
       break;
     }
-    case nop: {
+    case NOP: {
       ip() += 1;
       break;
     }
-    case jzvm: {
-      if (memory_unit[memory_unit[arg(2)]] == 0)
+    case JZVA: {
+      if ((*memory_unit)[(*memory_unit)[arg(2)]] == 0)
         ip() = arg(1);
       else
         ip() += 3;
       break;
     }
-    case jzmm: {
-      if (memory_unit[memory_unit[arg(2)]] == 0)
-        ip() = memory_unit[arg(1)];
+    case JZAA: {
+      if ((*memory_unit)[(*memory_unit)[arg(2)]] == 0)
+        ip() = (*memory_unit)[arg(1)];
       else
         ip() += 3;
       break;
     }
-    case jzvv: {
-      if (memory_unit[arg(2)] == 0)
+    case JZVV: {
+      if ((*memory_unit)[arg(2)] == 0)
         ip() = arg(1);
       else
         ip() += 3;
       break;
     }
-    case jzmv: {
-      if (memory_unit[arg(2)] == 0)
-        ip() = memory_unit[arg(1)];
+    case JZAV: {
+      if ((*memory_unit)[arg(2)] == 0)
+        ip() = (*memory_unit)[arg(1)];
       else
         ip() += 3;
       break;
     }
-    case intv: {
-      (*services[memory_unit[arg(1)]])(arg(1));
+    case INTV: {
+      services[(*memory_unit)[arg(1)]]->interrupt(this, arg(1));
       ip() += 2;
       break;
     }
-    case intm: {
-      (*services[memory_unit[memory_unit[arg(1)]]])(memory_unit[arg(1)]);
+    case INTA: {
+      services[(*memory_unit)[(*memory_unit)[arg(1)]]]
+        ->interrupt(this, (*memory_unit)[arg(1)]);
       ip() += 2;
       break;
     }

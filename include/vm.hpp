@@ -1,5 +1,5 @@
-#ifndef VM_H
-#define VM_H
+#ifndef INCLUDE_VM_HPP_
+#define INCLUDE_VM_HPP_
 
 #include <map>
 
@@ -9,24 +9,25 @@
 
 namespace lowvm {
 class VM {
- public:
-  VM(MU& memory_unit);
-
-  void step();
-  MU& getMU();
-  addr getIP();
-  void setService(int sid, Service* service);
-  bool isHalted();
-
- private:
-  MU& memory_unit;
   std::map<int, Service*> services;
   bool halted = false;
+  MU* memory_unit;
 
   cell& arg(size number);
   addr& ip();
   addr& sp();
+
+ public:
+  VM();
+  explicit VM(MU* memory_unit);
+
+  void step();
+  addr getIP();
+  MU& getMU();
+  void setService(int sid, Service* service);
+  void setMU(MU* memory_unit);
+  bool isHalted();
 };
 }  // namespace lowvm
 
-#endif
+#endif  // INCLUDE_VM_HPP_

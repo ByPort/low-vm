@@ -15,27 +15,26 @@ int main() {
     79,
     0xffffffff,
     0, 0, 0, 0,
-    movmm, 1, 2,
-    addvm, 8, 2,
-    jmpv, 17,  // p1
-    hlt,
-    addvv, (lowvm::cell)-1, 2,  // p1
-    nop,
-    nop,
-    movvm, (lowvm::cell)-70, 2,
-    addmm, 2, 2,
-    jzvm, 39, 2,
-    movmm, 1, 2,
-    addvm, 8, 2,
-    jmpv, 17,
-    addvv, 1, 2,
-    movmv, 2, 46,
-    jmpm, 0xffffffff,
+    MOVAA, 1, 2,
+    ADDVA, 8, 2,
+    JMPV, 17,  // p1
+    HLT,
+    ADDVV, (lowvm::cell)-1, 2,  // p1
+    NOP,
+    NOP,
+    MOVVA, (lowvm::cell)-70, 2,
+    ADDAA, 2, 2,
+    JZVA, 39, 2,
+    MOVAA, 1, 2,
+    ADDVA, 8, 2,
+    JMPV, 17,
+    ADDVV, 1, 2,
+    MOVAV, 2, 46,
+    JMPA, 0xffffffff,
   };
-  lowvm::cell* memptr = memory;
 
-  lowvm::MU memory_unit(memptr, sizeof(memory) / sizeof(memory[0]));
-  lowvm::VM vm(memory_unit);
+  lowvm::MU memory_unit(memory, sizeof(memory) / sizeof(memory[0]));
+  lowvm::VM vm(&memory_unit);
 
   std::cout << std::hex;
   do {

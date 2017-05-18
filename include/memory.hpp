@@ -1,5 +1,5 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef INCLUDE_MEMORY_HPP_
+#define INCLUDE_MEMORY_HPP_
 
 #include <vector>
 
@@ -20,20 +20,23 @@ struct SegRecord {
 };
 
 class MU : public Service {
+  cell* memory;
+  std::vector<SegRecord> active_segments;
+
+  addr abs(addr virtual_address, int seg = 0);
+
  public:
-  MU(cell*& pointer, size length);
+  MU(cell* pointer, size length);
 
   cell* getPointer();
   size getLength();
   cell& operator[] (addr at);
-  void operator()(addr service_header);
-
- private:
-  cell*& memory;
-  std::vector<SegRecord> active_segments;
-
-  addr abs(addr virtual_address, int seg = 0);
+  void interrupt(VM* context, addr service_header);
+  void attach(lowvm::VM* context);
+  void stepOn(lowvm::VM* context);
+  void stepOff(lowvm::VM* context);
+  void halt(lowvm::VM* context);
 };
 }  // namespace lowvm
 
-#endif
+#endif  // INCLUDE_MEMORY_HPP_

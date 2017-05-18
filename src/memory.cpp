@@ -2,8 +2,9 @@
 
 #include <memory.hpp>
 #include <isa.hpp>
+#include <vm.hpp>
 
-lowvm::MU::MU(cell*& pointer, size length)
+lowvm::MU::MU(cell* pointer, size length)
   : memory(pointer)
 {
   active_segments.push_back(SegRecord(0, length, 0));
@@ -17,7 +18,7 @@ lowvm::size lowvm::MU::getLength() {
   return active_segments.back().length;
 }
 
-void lowvm::MU::operator()(addr service_header) {
+void lowvm::MU::interrupt(VM* context, addr service_header) {
   switch ((*this)[service_header]) {
     case 0: {
       addr base;
@@ -45,6 +46,11 @@ void lowvm::MU::operator()(addr service_header) {
     }
   }
 }
+
+void lowvm::MU::attach(lowvm::VM* context) {}
+void lowvm::MU::stepOn(lowvm::VM* context) {}
+void lowvm::MU::stepOff(lowvm::VM* context) {}
+void lowvm::MU::halt(lowvm::VM* context) {}
 
 lowvm::addr lowvm::MU::abs(addr virtual_address, int seg) {
   for (
