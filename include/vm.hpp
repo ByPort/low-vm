@@ -2,20 +2,20 @@
 #define INCLUDE_VM_HPP_
 
 #include <map>
+#include <typeindex>
 
 #include <isa.hpp>
-#include <memory.hpp>
-#include <service.hpp>
+// #include <memory.hpp>
+// #include <service.hpp>
 
 namespace lowvm {
+class Service;
+class MU;
+
 class VM {
-  std::map<int, Service*> services;
+  std::map<std::type_index, std::map<int, Service*>> services;
   bool halted = false;
   MU* memory_unit;
-
-  cell& arg(size number);
-  addr& ip();
-  addr& sp();
 
  public:
   VM();
@@ -23,10 +23,15 @@ class VM {
 
   void step();
   addr getIP();
-  MU& getMU();
-  void setService(int sid, Service* service);
+  MU* getMU();
+  std::map<std::type_index, std::map<int, Service*>>& getServices();
+  void setService(std::type_index serviceType, int sid, Service* service);
   void setMU(MU* memory_unit);
   bool isHalted();
+  void halt();
+  cell& arg(size number);
+  addr& ip();
+  addr& sp();
 };
 }  // namespace lowvm
 

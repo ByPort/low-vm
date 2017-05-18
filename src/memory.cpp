@@ -47,11 +47,6 @@ void lowvm::MU::interrupt(VM* context, addr service_header) {
   }
 }
 
-void lowvm::MU::attach(lowvm::VM* context) {}
-void lowvm::MU::stepOn(lowvm::VM* context) {}
-void lowvm::MU::stepOff(lowvm::VM* context) {}
-void lowvm::MU::halt(lowvm::VM* context) {}
-
 lowvm::addr lowvm::MU::abs(addr virtual_address, int seg) {
   for (
     int i = active_segments.size() - 1;

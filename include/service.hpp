@@ -2,16 +2,39 @@
 #define INCLUDE_SERVICE_HPP_
 
 #include <isa.hpp>
-#include <vm.hpp>
+// #include <vm.hpp>
 
 namespace lowvm {
+class VM;
+
 class Service {
  public:
-  virtual void interrupt(lowvm::VM* context, addr service_header) = 0;
-  virtual void attach(lowvm::VM* context) = 0;
-  virtual void stepOn(lowvm::VM* context) = 0;
-  virtual void stepOff(lowvm::VM* context) = 0;
-  virtual void halt(lowvm::VM* context) = 0;
+  virtual ~Service() {}
+};
+
+class InterruptInterface : virtual public Service {
+ public:
+  virtual void interrupt(VM* context, addr service_header) = 0;
+};
+
+class AttachInterface : virtual public Service {
+ public:
+  virtual void attach(VM* context) = 0;
+};
+
+class HaltInterface : virtual public Service {
+ public:
+  virtual void halt(VM* context) = 0;
+};
+
+class StepOnInterface : virtual public Service {
+ public:
+  virtual void stepOn(VM* context) = 0;
+};
+
+class StepOffInterface : virtual public Service {
+ public:
+  virtual void stepOff(VM* context) = 0;
 };
 }  // namespace lowvm
 

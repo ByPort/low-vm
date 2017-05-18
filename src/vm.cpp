@@ -1,5 +1,6 @@
-#include <sstream>
-#include <stdexcept>
+#include <iostream>
+#include <typeinfo>
+#include <typeindex>
 
 #include <vm.hpp>
 #include <isa.hpp>
@@ -9,16 +10,22 @@
 lowvm::VM::VM() {}
 
 lowvm::VM::VM(MU* memory_unit)
-  : memory_unit(memory_unit) {
-  setService(0, memory_unit);
-}
+  : memory_unit(memory_unit) {}
 
-lowvm::MU& lowvm::VM::getMU() {
-  return *memory_unit;
+lowvm::MU* lowvm::VM::getMU() {
+  return memory_unit;
 }
 
 lowvm::cell& lowvm::VM::arg(size number) {
   return (*memory_unit)[ip() + number];
+}
+
+void lowvm::VM::halt() {
+  halted = true;
+}
+
+std::map<std::type_index, std::map<int, lowvm::Service*>>& lowvm::VM::getServices() {
+  return services;
 }
 
 lowvm::addr lowvm::VM::getIP() {
@@ -37,167 +44,18 @@ bool lowvm::VM::isHalted() {
   return halted;
 }
 
-void lowvm::VM::setService(int sid, lowvm::Service* service) {
-  if (services.find(sid) != services.end())
+void lowvm::VM::setService(std::type_index serviceType, int sid, lowvm::Service* service) {
+  if (AttachInterface* attachable = dynamic_cast<AttachInterface*>(service)) {
+    attachable->attach(this);
+  }
+  if (services[serviceType].find(sid) != services[serviceType].end())
     throw std::invalid_argument(
       "Service with SID " + std::to_string(sid) + " already exists");
-  services[sid] = service;
+  services[serviceType][sid] = service;
 }
 
 void lowvm::VM::step() {
-  using namespace lowvm::instructions;
-
-  switch (arg(0)) {
-    case MOVVV: {
-      (*memory_unit)[arg(2)] = arg(1);
-      ip() += 3;
-      break;
-    }
-    case MOVAV: {
-      (*memory_unit)[arg(2)] = (*memory_unit)[arg(1)];
-      ip() += 3;
-      break;
-    }
-    case MOVVA: {
-      (*memory_unit)[(*memory_unit)[arg(2)]] = arg(1);
-      ip() += 3;
-      break;
-    }
-    case MOVAA: {
-      (*memory_unit)[(*memory_unit)[arg(2)]] = (*memory_unit)[arg(1)];
-      ip() += 3;
-      break;
-    }
-    case ADDVV: {
-      (*memory_unit)[arg(2)] += arg(1);
-      ip() += 3;
-      break;
-    }
-    case ADDAV: {
-      (*memory_unit)[arg(2)] += (*memory_unit)[arg(1)];
-      ip() += 3;
-      break;
-    }
-    case ADDAA: {
-      (*memory_unit)[(*memory_unit)[arg(2)]] += (*memory_unit)[arg(1)];
-      ip() += 3;
-      break;
-    }
-    case ADDVA: {
-      (*memory_unit)[(*memory_unit)[arg(2)]] += arg(1);
-      ip() += 3;
-      break;
-    }
-    case MULVV: {
-      (*memory_unit)[arg(2)] *= arg(1);
-      ip() += 3;
-      break;
-    }
-    case MULAV: {
-      (*memory_unit)[arg(2)] *= (*memory_unit)[arg(1)];
-      ip() += 3;
-      break;
-    }
-    case DIVVV: {
-      (*memory_unit)[arg(2)] /= arg(1);
-      ip() += 3;
-      break;
-    }
-    case DIVAV: {
-      (*memory_unit)[arg(2)] /= (*memory_unit)[arg(1)];
-      ip() += 3;
-      break;
-    }
-    case ORVV: {
-      (*memory_unit)[arg(2)] |= arg(1);
-      ip() += 3;
-      break;
-    }
-    case ORAV: {
-      (*memory_unit)[arg(2)] |= (*memory_unit)[arg(1)];
-      ip() += 3;
-      break;
-    }
-    case ANDVV: {
-      (*memory_unit)[arg(2)] &= arg(1);
-      ip() += 3;
-      break;
-    }
-    case ANDAV: {
-      (*memory_unit)[arg(2)] &= (*memory_unit)[arg(1)];
-      ip() += 3;
-      break;
-    }
-    case XORVV: {
-      (*memory_unit)[arg(2)] ^= arg(1);
-      ip() += 3;
-      break;
-    }
-    case XORAV: {
-      (*memory_unit)[arg(2)] ^= (*memory_unit)[arg(1)];
-      ip() += 3;
-      break;
-    }
-    case JMPV: {
-      ip() = arg(1);
-      break;
-    }
-    case JMPA: {
-      ip() = (*memory_unit)[arg(1)];
-      break;
-    }
-    case HLT: {
-      halted = true;
-      ip() += 1;
-      break;
-    }
-    case NOP: {
-      ip() += 1;
-      break;
-    }
-    case JZVA: {
-      if ((*memory_unit)[(*memory_unit)[arg(2)]] == 0)
-        ip() = arg(1);
-      else
-        ip() += 3;
-      break;
-    }
-    case JZAA: {
-      if ((*memory_unit)[(*memory_unit)[arg(2)]] == 0)
-        ip() = (*memory_unit)[arg(1)];
-      else
-        ip() += 3;
-      break;
-    }
-    case JZVV: {
-      if ((*memory_unit)[arg(2)] == 0)
-        ip() = arg(1);
-      else
-        ip() += 3;
-      break;
-    }
-    case JZAV: {
-      if ((*memory_unit)[arg(2)] == 0)
-        ip() = (*memory_unit)[arg(1)];
-      else
-        ip() += 3;
-      break;
-    }
-    case INTV: {
-      services[(*memory_unit)[arg(1)]]->interrupt(this, arg(1));
-      ip() += 2;
-      break;
-    }
-    case INTA: {
-      services[(*memory_unit)[(*memory_unit)[arg(1)]]]
-        ->interrupt(this, (*memory_unit)[arg(1)]);
-      ip() += 2;
-      break;
-    }
-    default: {
-      std::stringstream msg;
-      msg << "No instruction with code " << arg(0);
-      throw std::invalid_argument(msg.str());
-    }
+  for (auto i = services[std::type_index(typeid(StepOnInterface))].begin(); i != services[std::type_index(typeid(StepOnInterface))].end(); i++) {
+    dynamic_cast<StepOnInterface*>(i->second)->stepOn(this);
   }
 }

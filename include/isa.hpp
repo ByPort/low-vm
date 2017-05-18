@@ -4,10 +4,6 @@
 #include <cstdint>
 
 namespace lowvm {
-class VM;
-class MU;
-class Service;
-
 using addr = std::uint32_t;
 using virt = addr;
 using size = std::size_t;

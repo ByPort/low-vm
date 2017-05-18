@@ -1,10 +1,14 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdio>
+#include <typeinfo>
+#include <typeindex>
 
-#include "isa.hpp"
-#include "vm.hpp"
-#include "memory.hpp"
+#include <isa.hpp>
+#include <vm.hpp>
+#include <memory.hpp>
+#include <service.hpp>
+#include <interpreter.hpp>
 
 int main() {
   using namespace lowvm::instructions;
@@ -49,6 +53,10 @@ int main() {
 
   lowvm::MU memory_unit(memory, sizeof(memory) / sizeof(memory[0]));
   lowvm::VM vm(&memory_unit);
+  lowvm::Interpreter itpt;
+  vm.setService(std::type_index(typeid(lowvm::StepOnInterface)), 0, &itpt);
+  vm.setService(std::type_index(typeid(lowvm::InterruptInterface)), 0, &memory_unit);
+
   std::cout << std::hex;
   do {
     std::cout << " IP: " << std::setw(8) << std::setfill('0')
