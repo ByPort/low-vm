@@ -1,14 +1,11 @@
-#include <iostream>
-#include <iomanip>
-#include <cstdio>
 #include <typeinfo>
 #include <typeindex>
 
 #include <isa.hpp>
 #include <vm.hpp>
 #include <memory.hpp>
-#include <service.hpp>
 #include <interpreter.hpp>
+#include <debugger.hpp>
 
 int main() {
   using namespace lowvm::instructions;
@@ -53,27 +50,14 @@ int main() {
 
   lowvm::MU memory_unit(memory, sizeof(memory) / sizeof(memory[0]));
   lowvm::VM vm(&memory_unit);
-  lowvm::Interpreter itpt;
-  vm.setService(std::type_index(typeid(lowvm::StepOnInterface)), 0, &itpt);
+  lowvm::Interpreter interpreter;
+  lowvm::Debugger debugger;
+
+  vm.setService(std::type_index(typeid(lowvm::StepOnInterface)), 0, &debugger);
+  vm.setService(std::type_index(typeid(lowvm::StepOffInterface)), 0, &debugger);
+  vm.setService(std::type_index(typeid(lowvm::HaltInterface)), 0, &debugger);
+  vm.setService(std::type_index(typeid(lowvm::StepOnInterface)), 1, &interpreter);
   vm.setService(std::type_index(typeid(lowvm::InterruptInterface)), 0, &memory_unit);
 
-  std::cout << std::hex;
-  do {
-    std::cout << " IP: " << std::setw(8) << std::setfill('0')
-    << vm.getIP() << std::endl
-    << "COM: " << std::setw(8) << std::setfill('0')
-    << memory_unit[vm.getIP()] << std::endl;
-    std::cout << "MEM: " << std::endl;
-    for (lowvm::addr i = 0; i < memory_unit.getLength(); i++) {
-      if (i % 4 == 0)
-        std::cout << std::setfill('0') << std::setw(8) << i << " : ";
-      std::cout << std::setfill('0') << std::setw(8)
-      << memory_unit[i] << " ";
-      if (i % 4 == 3)
-        std::cout << std::endl;
-    }
-    vm.step();
-    std::getchar();
-  } while (!vm.isHalted());
-  std::cout << "HALTED" << std::endl;
+  do { vm.step(); } while (!vm.isHalted());
 }

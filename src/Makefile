@@ -2,7 +2,7 @@ CXX = c++
 CXXFLAGS = -std=c++14 -c -Wall
 INCLUDES = -I../include
 
-all: vm memory interpreter
+all: vm memory interpreter debugger
 
 memory:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) memory.cpp
@@ -12,6 +12,9 @@ vm:
 
 interpreter:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) interpreter.cpp
+
+debugger:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) debugger.cpp
 
 clean:
 	find . -type f -name "*.o" -delete
