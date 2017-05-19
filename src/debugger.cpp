@@ -7,7 +7,7 @@
 #include <vm.hpp>
 #include <memory.hpp>
 
-void lowvm::Debugger::stepOn(lowvm::VM* context) {
+void lowvm::Debugger::stepOn(lowvm::VM* context, int index) {
   std::clog << std::hex;
   std::clog << " IP: " << std::setw(8) << std::setfill('0')
   << context->getIP() << '\n'
@@ -25,7 +25,7 @@ void lowvm::Debugger::stepOn(lowvm::VM* context) {
   std::clog << std::dec;
 }
 
-void lowvm::Debugger::stepOff(lowvm::VM* context) {
+void lowvm::Debugger::stepOff(lowvm::VM* context, int index) {
   std::getchar();
 }
 

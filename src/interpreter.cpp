@@ -6,7 +6,7 @@
 #include <vm.hpp>
 #include <memory.hpp>
 
-void lowvm::Interpreter::stepOn(lowvm::VM* c) {
+void lowvm::Interpreter::stepOn(lowvm::VM* c, int index) {
   using namespace lowvm::instructions;
 
   switch (c->arg(0)) {
@@ -146,12 +146,20 @@ void lowvm::Interpreter::stepOn(lowvm::VM* c) {
       break;
     }
     case INTV: {
-      dynamic_cast<InterruptInterface*>(c->getServices()[std::type_index(typeid(InterruptInterface))][(*c->getMU())[c->arg(1)]])->interrupt(c, c->arg(1));
+      dynamic_cast<ServeInterface*>(
+        c->getServices()
+        [std::type_index(typeid(ServeInterface))]
+        [(*c->getMU())[c->arg(1)]])
+        ->serve(c, c->arg(1));
       c->ip() += 2;
       break;
     }
     case INTA: {
-      dynamic_cast<InterruptInterface*>(c->getServices()[std::type_index(typeid(InterruptInterface))][(*c->getMU())[(*c->getMU())[c->arg(1)]]])->interrupt(c, (*c->getMU())[c->arg(1)]);
+      dynamic_cast<ServeInterface*>(
+        c->getServices()
+        [std::type_index(typeid(ServeInterface))]
+        [(*c->getMU())[(*c->getMU())[c->arg(1)]]])
+        ->serve(c, (*c->getMU())[c->arg(1)]);
       c->ip() += 2;
       break;
     }

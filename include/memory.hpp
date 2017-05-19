@@ -19,7 +19,7 @@ struct SegRecord {
   {}
 };
 
-class MU : public InterruptInterface {
+class MU : public ServeInterface {
   cell* memory;
   std::vector<SegRecord> active_segments;
 
@@ -31,7 +31,7 @@ class MU : public InterruptInterface {
   cell* getPointer();
   size getLength();
   cell& operator[] (addr at);
-  void interrupt(VM* context, addr service_header);
+  void serve(VM* context, addr header);
 };
 }  // namespace lowvm
 

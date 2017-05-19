@@ -39,11 +39,11 @@ int main() {
   lowvm::Interpreter interpreter;
   lowvm::Debugger debugger;
 
-  vm.setService(std::type_index(typeid(lowvm::StepOnInterface)), 0, &debugger);
-  vm.setService(std::type_index(typeid(lowvm::StepOffInterface)), 0, &debugger);
-  vm.setService(std::type_index(typeid(lowvm::HaltInterface)), 0, &debugger);
-  vm.setService(std::type_index(typeid(lowvm::StepOnInterface)), 1, &interpreter);
-  vm.setService(std::type_index(typeid(lowvm::InterruptInterface)), 0, &memory_unit);
+  vm.setService<lowvm::StepOnInterface>(0, &debugger);
+  vm.setService<lowvm::StepOffInterface>(0, &debugger);
+  vm.setService<lowvm::HaltInterface>(0, &debugger);
+  vm.setService<lowvm::StepOnInterface>(1, &interpreter);
+  vm.setService<lowvm::ServeInterface>(0, &memory_unit);
 
   do { vm.step(); } while (!vm.isHalted());
 }

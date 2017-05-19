@@ -12,14 +12,14 @@ class Service {
   virtual ~Service() {}
 };
 
-class InterruptInterface : virtual public Service {
+class ServeInterface : virtual public Service {
  public:
-  virtual void interrupt(VM* context, addr service_header) = 0;
+  virtual void serve(VM* context, addr header) = 0;
 };
 
 class AttachInterface : virtual public Service {
  public:
-  virtual void attach(VM* context) = 0;
+  virtual void attach(VM* context, int sid) = 0;
 };
 
 class HaltInterface : virtual public Service {
@@ -29,12 +29,18 @@ class HaltInterface : virtual public Service {
 
 class StepOnInterface : virtual public Service {
  public:
-  virtual void stepOn(VM* context) = 0;
+  virtual void stepOn(VM* context, int index) = 0;
 };
 
 class StepOffInterface : virtual public Service {
  public:
-  virtual void stepOff(VM* context) = 0;
+  virtual void stepOff(VM* context, int index) = 0;
+};
+
+class PortInterface : virtual public Service {
+ public:
+  virtual void recieve(VM* context, cell data) = 0;
+  virtual cell send(VM* context) = 0;
 };
 }  // namespace lowvm
 

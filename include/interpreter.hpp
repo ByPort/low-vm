@@ -6,7 +6,7 @@
 namespace lowvm {
 class Interpreter : public StepOnInterface {
  public:
-  void stepOn(lowvm::VM* context);
+  void stepOn(lowvm::VM* context, int index);
 };
 }  // namespace lowvm
 

@@ -18,8 +18,8 @@ lowvm::size lowvm::MU::getLength() {
   return active_segments.back().length;
 }
 
-void lowvm::MU::interrupt(VM* context, addr service_header) {
-  switch ((*this)[service_header + 1]) {
+void lowvm::MU::serve(VM* context, addr header) {
+  switch ((*this)[header + 1]) {
     case 0: {
       addr base;
       addr seglist;
@@ -27,7 +27,7 @@ void lowvm::MU::interrupt(VM* context, addr service_header) {
       for (
         base = (*this)[3],
         seglist = 0,
-        segnum = (*this)[service_header + 2];
+        segnum = (*this)[header + 2];
         (*this)[base + seglist] != 0 && segnum > 0;
         ++seglist, --segnum
       ) {
@@ -46,7 +46,7 @@ void lowvm::MU::interrupt(VM* context, addr service_header) {
       break;
     }
     case 1: {
-      (*this)[service_header + 2] = active_segments.back().length;
+      (*this)[header + 2] = active_segments.back().length;
       break;
     }
   }

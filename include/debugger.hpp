@@ -6,8 +6,8 @@
 namespace lowvm {
 class Debugger : public StepOnInterface, public StepOffInterface, public HaltInterface {
  public:
-  void stepOn(lowvm::VM* context);
-  void stepOff(lowvm::VM* context);
+  void stepOn(lowvm::VM* context, int index);
+  void stepOff(lowvm::VM* context, int index);
   void halt(lowvm::VM* context);
 };
 }  // namespace lowvm

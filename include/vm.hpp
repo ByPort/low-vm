@@ -6,10 +6,9 @@
 
 #include <isa.hpp>
 // #include <memory.hpp>
-// #include <service.hpp>
+#include <service.hpp>
 
 namespace lowvm {
-class Service;
 class MU;
 
 class VM {
@@ -25,7 +24,22 @@ class VM {
   addr getIP();
   MU* getMU();
   std::map<std::type_index, std::map<int, Service*>>& getServices();
-  void setService(std::type_index serviceType, int sid, Service* service);
+  template <
+    typename T,
+    typename std::enable_if<std::is_base_of<Service, T>::value>::type* = nullptr
+  >
+  void setService(int sid, T* service) {
+    if (services[std::type_index(typeid(T))].count(sid) > 0) {
+      throw std::invalid_argument(
+        "Service with SID " +
+        std::to_string(sid) +
+        " already exists");
+    }
+    services[std::type_index(typeid(T))][sid] = service;
+    if (AttachInterface* attachable = dynamic_cast<AttachInterface*>(service)) {
+      attachable->attach(this, sid);
+    }
+  }
   void setMU(MU* memory_unit);
   bool isHalted();
   void halt();

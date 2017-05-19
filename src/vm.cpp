@@ -1,6 +1,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <typeindex>
+#include <iterator>
 
 #include <vm.hpp>
 #include <isa.hpp>
@@ -47,21 +48,27 @@ bool lowvm::VM::isHalted() {
   return halted;
 }
 
-void lowvm::VM::setService(std::type_index serviceType, int sid, lowvm::Service* service) {
-  if (AttachInterface* attachable = dynamic_cast<AttachInterface*>(service)) {
-    attachable->attach(this);
-  }
-  if (services[serviceType].find(sid) != services[serviceType].end())
-    throw std::invalid_argument(
-      "Service with SID " + std::to_string(sid) + " already exists");
-  services[serviceType][sid] = service;
-}
-
 void lowvm::VM::step() {
-  for (auto i = services[std::type_index(typeid(StepOnInterface))].begin(); i != services[std::type_index(typeid(StepOnInterface))].end(); i++) {
-    dynamic_cast<StepOnInterface*>(i->second)->stepOn(this);
+  for (
+    auto i = services[std::type_index(typeid(StepOnInterface))].begin();
+    i != services[std::type_index(typeid(StepOnInterface))].end();
+    i++
+  ) {
+    dynamic_cast<StepOnInterface*>(i->second)->stepOn(
+      this,
+      std::distance(
+        services[std::type_index(typeid(StepOnInterface))].begin(),
+        i));
   }
-  for (auto i = services[std::type_index(typeid(StepOffInterface))].begin(); i != services[std::type_index(typeid(StepOffInterface))].end(); i++) {
-    dynamic_cast<StepOffInterface*>(i->second)->stepOff(this);
+  for (
+    auto i = services[std::type_index(typeid(StepOffInterface))].begin();
+    i != services[std::type_index(typeid(StepOffInterface))].end();
+    i++
+  ) {
+    dynamic_cast<StepOffInterface*>(i->second)->stepOff(
+      this,
+      std::distance(
+        services[std::type_index(typeid(StepOffInterface))].begin(),
+        i));
   }
 }

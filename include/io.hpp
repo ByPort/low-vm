@@ -6,9 +6,9 @@
 #include <isa.hpp>
 
 namespace lowvm {
-class IO : public InterruptInterface {
+class IO : public ServeInterface {
  public:
-  void interrupt(VM* context, addr service_header);
+  void serve(VM* context, addr header);
 };
 }  // namespace lowvm
 
