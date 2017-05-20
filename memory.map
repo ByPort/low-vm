@@ -3,7 +3,7 @@ header:
 00000001 ip
 00000002 sp
 00000003 *seglist
-00000004 __reserved__
+00000004 *intlist
 00000005 __reserved__
 00000006 __reserved__
 00000007 __reserved__
@@ -22,4 +22,20 @@ segrecord:
 +00000000 *begin
 +00000001 size
 +00000002 flags
++00000003 __reserved__
+
+intlist:
++00000000 *intrecord
++00000001 *intrecord
++00000002 *intrecord
++00000003 *intrecord
++00000004 *intrecord
++00000005 *intrecord
++00000006 *intrecord
++00000007 *intlist
+
+segrecord:
++00000000 *callback
++00000001 flags
++00000002 __reserved__
 +00000003 __reserved__

@@ -5,7 +5,6 @@
 #include <typeindex>
 
 #include <isa.hpp>
-// #include <memory.hpp>
 #include <service.hpp>
 
 namespace lowvm {
@@ -24,11 +23,11 @@ class VM {
   addr getIP();
   MU* getMU();
   std::map<std::type_index, std::map<int, Service*>>& getServices();
-  template <
-    typename T,
-    typename std::enable_if<std::is_base_of<Service, T>::value>::type* = nullptr
-  >
+  template <typename T>
   void setService(int sid, T* service) {
+    static_assert(
+      std::is_base_of<Service, T>::value,
+      "T is not inherited from Service");
     if (services[std::type_index(typeid(T))].count(sid) > 0) {
       throw std::invalid_argument(
         "Service with SID " +
@@ -46,6 +45,7 @@ class VM {
   cell& arg(size number);
   addr& ip();
   addr& sp();
+  void interrupt(Interrupts iid);
 };
 }  // namespace lowvm
 

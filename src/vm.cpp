@@ -48,6 +48,27 @@ bool lowvm::VM::isHalted() {
   return halted;
 }
 
+void lowvm::VM::interrupt(lowvm::Interrupts iid) {
+  addr base;
+  addr intlist;
+  cell intnum;
+  for (
+    base = (*memory_unit)[4],
+    intlist = 0,
+    intnum = static_cast<std::uint32_t>(iid);
+    (*memory_unit)[base + intlist] != 0 && intnum > 0;
+    ++intlist, --intnum
+  ) {
+    if (intlist == 7) {
+      base = (*memory_unit)[base + intlist];
+      intlist = 0;
+    }
+  }
+  if ((*memory_unit)[base + intlist] == 0) throw;
+  (*memory_unit)[(*memory_unit)[2]] = (*memory_unit)[1];
+  (*memory_unit)[1] = (*memory_unit)[(*memory_unit)[base + intlist]];
+}
+
 void lowvm::VM::step() {
   for (
     auto i = services[std::type_index(typeid(StepOnInterface))].begin();

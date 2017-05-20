@@ -8,7 +8,9 @@
 #include <debugger.hpp>
 
 int main() {
-  using namespace lowvm::instructions;
+  using I = lowvm::instructions::Instructions;
+  using O = lowvm::instructions::Opcodes;
+  using lowvm::c;
 
   lowvm::cell memory[200] = {
     0xffffffff,
@@ -22,30 +24,30 @@ int main() {
     80,
     0xffffffff,
     0xffffffff,
-    INTV, 23,
-    HLT,
+    c(I::SRVV), 23,
+    c(O::HLT),
     0, 0, 0,
     0xffffffff,
     8,
     79,
     0xffffffff,
     0, 0, 0, 0,
-    MOVAA, 1, 2,
-    ADDVA, 8, 2,
-    JMPV, 17,
-    HLT,
-    ADDVV, (lowvm::cell)-1, 2,
-    NOP,
-    NOP,
-    MOVVA, (lowvm::cell)-70, 2,
-    ADDAA, 2, 2,
-    JZVA, 39, 2,
-    MOVAA, 1, 2,
-    ADDVA, 8, 2,
-    JMPV, 17,
-    ADDVV, 1, 2,
-    MOVAV, 2, 46,
-    JMPA, 0xffffffff,
+    c(I::MOVAA), 1, 2,
+    c(I::ADDVA), 8, 2,
+    c(I::JMPV), 17,
+    c(O::HLT),
+    c(I::ADDVV), (lowvm::cell)-1, 2,
+    c(O::NOP),
+    c(O::NOP),
+    c(I::MOVVA), (lowvm::cell)-70, 2,
+    c(I::ADDAA), 2, 2,
+    c(I::JZVA), 39, 2,
+    c(I::MOVAA), 1, 2,
+    c(I::ADDVA), 8, 2,
+    c(I::JMPV), 17,
+    c(I::ADDVV), 1, 2,
+    c(I::MOVAV), 2, 46,
+    c(I::JMPA), 0xffffffff,
   };
 
   lowvm::MU memory_unit(memory, sizeof(memory) / sizeof(memory[0]));
