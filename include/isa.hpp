@@ -12,7 +12,9 @@ using ptr = void*;
 
 enum class Interrupts : std::uint32_t {
   INVALID_SERVICE = 0,
-  INVALID_INSTRUCTION = 1
+  INVALID_INSTRUCTION = 1,
+  DIVIDE_BY_ZERO = 2,
+  BAD_MEMORY_ACCESS = 3,
 };
 
 template <typename T>
@@ -33,19 +35,19 @@ enum class Opcodes : cell {
   DIV = 0x8,
   OR  = 0x9,
   AND = 0xA,
-  XOR = 0xB
+  XOR = 0xB,
 };
 
 enum class Types : cell {
   ADDR = 0,
-  VAL = 1
+  VAL = 1,
 };
 
 enum class Sizes : cell {
   BYTE = 0,
   WORD = 1,
   DWORD = 2,
-  QWORD = 3
+  QWORD = 3,
 };
 
 constexpr cell i(

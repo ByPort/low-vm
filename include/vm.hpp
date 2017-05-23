@@ -22,7 +22,13 @@ class VM {
   void step();
   addr getIP();
   MU* getMU();
-  std::map<std::type_index, std::map<int, Service*>>& getServices();
+  template <typename T>
+  std::map<int, Service*>& getServices() {
+    static_assert(
+      std::is_base_of<Service, T>::value,
+      "T is not inherited from Service");
+    return services[std::type_index(typeid(T))];
+  }
   template <typename T>
   void setService(int sid, T* service) {
     static_assert(

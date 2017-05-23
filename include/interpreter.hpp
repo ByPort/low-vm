@@ -4,9 +4,9 @@
 #include <service.hpp>
 
 namespace lowvm {
-class Interpreter : public StepOnInterface {
+class Interpreter : public InstructionSetProvider {
  public:
-  void stepOn(lowvm::VM* context, int index);
+  bool exec(lowvm::VM* context);
 };
 }  // namespace lowvm
 

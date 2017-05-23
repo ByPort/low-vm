@@ -5,174 +5,187 @@
 #include <vm.hpp>
 #include <memory.hpp>
 
-void lowvm::Interpreter::stepOn(lowvm::VM* c, int index) {
+bool lowvm::Interpreter::exec(lowvm::VM* ctx) {
   using I = instructions::Instructions;
   using O = instructions::Opcodes;
 
-  switch (c->arg(0)) {
-    case c(I::MOVVV): {
-      (*c->getMU())[c->arg(2)] = c->arg(1);
-      c->ip() += 3;
-      break;
-    }
-    case c(I::MOVAV): {
-      (*c->getMU())[c->arg(2)] = (*c->getMU())[c->arg(1)];
-      c->ip() += 3;
-      break;
-    }
-    case c(I::MOVVA): {
-      (*c->getMU())[(*c->getMU())[c->arg(2)]] = c->arg(1);
-      c->ip() += 3;
-      break;
-    }
-    case c(I::MOVAA): {
-      (*c->getMU())[(*c->getMU())[c->arg(2)]] = (*c->getMU())[c->arg(1)];
-      c->ip() += 3;
-      break;
-    }
-    case c(I::ADDVV): {
-      (*c->getMU())[c->arg(2)] += c->arg(1);
-      c->ip() += 3;
-      break;
-    }
-    case c(I::ADDAV): {
-      (*c->getMU())[c->arg(2)] += (*c->getMU())[c->arg(1)];
-      c->ip() += 3;
-      break;
-    }
-    case c(I::ADDAA): {
-      (*c->getMU())[(*c->getMU())[c->arg(2)]] += (*c->getMU())[c->arg(1)];
-      c->ip() += 3;
-      break;
-    }
-    case c(I::ADDVA): {
-      (*c->getMU())[(*c->getMU())[c->arg(2)]] += c->arg(1);
-      c->ip() += 3;
-      break;
-    }
-    case c(I::MULVV): {
-      (*c->getMU())[c->arg(2)] *= c->arg(1);
-      c->ip() += 3;
-      break;
-    }
-    case c(I::MULAV): {
-      (*c->getMU())[c->arg(2)] *= (*c->getMU())[c->arg(1)];
-      c->ip() += 3;
-      break;
-    }
-    case c(I::DIVVV): {
-      (*c->getMU())[c->arg(2)] /= c->arg(1);
-      c->ip() += 3;
-      break;
-    }
-    case c(I::DIVAV): {
-      (*c->getMU())[c->arg(2)] /= (*c->getMU())[c->arg(1)];
-      c->ip() += 3;
-      break;
-    }
-    case c(I::ORVV): {
-      (*c->getMU())[c->arg(2)] |= c->arg(1);
-      c->ip() += 3;
-      break;
-    }
-    case c(I::ORAV): {
-      (*c->getMU())[c->arg(2)] |= (*c->getMU())[c->arg(1)];
-      c->ip() += 3;
-      break;
-    }
-    case c(I::ANDVV): {
-      (*c->getMU())[c->arg(2)] &= c->arg(1);
-      c->ip() += 3;
-      break;
-    }
-    case c(I::ANDAV): {
-      (*c->getMU())[c->arg(2)] &= (*c->getMU())[c->arg(1)];
-      c->ip() += 3;
-      break;
-    }
-    case c(I::XORVV): {
-      (*c->getMU())[c->arg(2)] ^= c->arg(1);
-      c->ip() += 3;
-      break;
-    }
-    case c(I::XORAV): {
-      (*c->getMU())[c->arg(2)] ^= (*c->getMU())[c->arg(1)];
-      c->ip() += 3;
-      break;
-    }
-    case c(I::JMPV): {
-      c->ip() = c->arg(1);
-      break;
-    }
-    case c(I::JMPA): {
-      c->ip() = (*c->getMU())[c->arg(1)];
-      break;
-    }
-    case c(O::HLT): {
-      c->halt();
-      c->ip() += 1;
-      break;
-    }
-    case c(O::NOP): {
-      c->ip() += 1;
-      break;
-    }
-    case c(I::JZVA): {
-      if ((*c->getMU())[(*c->getMU())[c->arg(2)]] == 0)
-        c->ip() = c->arg(1);
-      else
-        c->ip() += 3;
-      break;
-    }
-    case c(I::JZAA): {
-      if ((*c->getMU())[(*c->getMU())[c->arg(2)]] == 0)
-        c->ip() = (*c->getMU())[c->arg(1)];
-      else
-        c->ip() += 3;
-      break;
-    }
-    case c(I::JZVV): {
-      if ((*c->getMU())[c->arg(2)] == 0)
-        c->ip() = c->arg(1);
-      else
-        c->ip() += 3;
-      break;
-    }
-    case c(I::JZAV): {
-      if ((*c->getMU())[c->arg(2)] == 0)
-        c->ip() = (*c->getMU())[c->arg(1)];
-      else
-        c->ip() += 3;
-      break;
-    }
-    case c(I::SRVV): {
-      try {
-        Service* service = c->getServices()
-          [std::type_index(typeid(ServeInterface))]
-          .at((*c->getMU())[c->arg(1)]);
-        dynamic_cast<ServeInterface*>(service)
-          ->serve(c, c->arg(1));
-        c->ip() += 2;
-      } catch (const std::out_of_range& e) {
-        c->interrupt(lowvm::Interrupts::INVALID_SERVICE);
+  MU& mu = *ctx->getMU();
+
+  try {
+    switch (ctx->arg(0)) {
+      case c(I::MOVVV): {
+        mu[ctx->arg(2)] = ctx->arg(1);
+        ctx->ip() += 3;
+        break;
       }
-      break;
-    }
-    case c(I::SRVA): {
-      try {
-        Service* service = c->getServices()
-          [std::type_index(typeid(ServeInterface))]
-          .at((*c->getMU())[(*c->getMU())[c->arg(1)]]);
-        dynamic_cast<ServeInterface*>(service)
-          ->serve(c, (*c->getMU())[c->arg(1)]);
-        c->ip() += 2;
-      } catch (const std::out_of_range& e) {
-        c->interrupt(lowvm::Interrupts::INVALID_SERVICE);
+      case c(I::MOVAV): {
+        mu[ctx->arg(2)] = mu[ctx->arg(1)];
+        ctx->ip() += 3;
+        break;
       }
-      break;
+      case c(I::MOVVA): {
+        mu[mu[ctx->arg(2)]] = ctx->arg(1);
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::MOVAA): {
+        mu[mu[ctx->arg(2)]] = mu[ctx->arg(1)];
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::ADDVV): {
+        mu[ctx->arg(2)] += ctx->arg(1);
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::ADDAV): {
+        mu[ctx->arg(2)] += mu[ctx->arg(1)];
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::ADDAA): {
+        mu[mu[ctx->arg(2)]] += mu[ctx->arg(1)];
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::ADDVA): {
+        mu[mu[ctx->arg(2)]] += ctx->arg(1);
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::MULVV): {
+        mu[ctx->arg(2)] *= ctx->arg(1);
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::MULAV): {
+        mu[ctx->arg(2)] *= mu[ctx->arg(1)];
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::DIVVV): {
+        if (ctx->arg(1) == 0) {
+          ctx->interrupt(Interrupts::DIVIDE_BY_ZERO);
+          break;
+        }
+        mu[ctx->arg(2)] /= ctx->arg(1);
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::DIVAV): {
+        if (mu[ctx->arg(1)]) {
+          ctx->interrupt(Interrupts::DIVIDE_BY_ZERO);
+          break;
+        }
+        mu[ctx->arg(2)] /= mu[ctx->arg(1)];
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::ORVV): {
+        mu[ctx->arg(2)] |= ctx->arg(1);
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::ORAV): {
+        mu[ctx->arg(2)] |= mu[ctx->arg(1)];
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::ANDVV): {
+        mu[ctx->arg(2)] &= ctx->arg(1);
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::ANDAV): {
+        mu[ctx->arg(2)] &= mu[ctx->arg(1)];
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::XORVV): {
+        mu[ctx->arg(2)] ^= ctx->arg(1);
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::XORAV): {
+        mu[ctx->arg(2)] ^= mu[ctx->arg(1)];
+        ctx->ip() += 3;
+        break;
+      }
+      case c(I::JMPV): {
+        ctx->ip() = ctx->arg(1);
+        break;
+      }
+      case c(I::JMPA): {
+        ctx->ip() = mu[ctx->arg(1)];
+        break;
+      }
+      case c(O::HLT): {
+        ctx->halt();
+        ctx->ip() += 1;
+        break;
+      }
+      case c(O::NOP): {
+        ctx->ip() += 1;
+        break;
+      }
+      case c(I::JZVA): {
+        if (mu[mu[ctx->arg(2)]] == 0)
+          ctx->ip() = ctx->arg(1);
+        else
+          ctx->ip() += 3;
+        break;
+      }
+      case c(I::JZAA): {
+        if (mu[mu[ctx->arg(2)]] == 0)
+          ctx->ip() = mu[ctx->arg(1)];
+        else
+          ctx->ip() += 3;
+        break;
+      }
+      case c(I::JZVV): {
+        if (mu[ctx->arg(2)] == 0)
+          ctx->ip() = ctx->arg(1);
+        else
+          ctx->ip() += 3;
+        break;
+      }
+      case c(I::JZAV): {
+        if (mu[ctx->arg(2)] == 0)
+          ctx->ip() = mu[ctx->arg(1)];
+        else
+          ctx->ip() += 3;
+        break;
+      }
+      case c(I::SRVV): {
+        try {
+          Service* service = ctx->getServices<ServeInterface>()
+            .at(mu[ctx->arg(1)]);
+          dynamic_cast<ServeInterface*>(service)
+            ->serve(ctx, ctx->arg(1));
+          ctx->ip() += 2;
+        } catch (const std::out_of_range& e) {
+          ctx->interrupt(lowvm::Interrupts::INVALID_SERVICE);
+        }
+        break;
+      }
+      case c(I::SRVA): {
+        try {
+          Service* service = ctx->getServices<ServeInterface>()
+            .at(mu[mu[ctx->arg(1)]]);
+          dynamic_cast<ServeInterface*>(service)
+            ->serve(ctx, mu[ctx->arg(1)]);
+          ctx->ip() += 2;
+        } catch (const std::out_of_range& e) {
+          ctx->interrupt(lowvm::Interrupts::INVALID_SERVICE);
+        }
+        break;
+      }
+      default: {
+        return false;
+      }
     }
-    default: {
-      c->interrupt(lowvm::Interrupts::INVALID_INSTRUCTION);
-    }
+  } catch (const std::out_of_range& e) {
+    ctx->interrupt(Interrupts::BAD_MEMORY_ACCESS);
   }
+  return true;
 }

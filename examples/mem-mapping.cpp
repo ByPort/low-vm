@@ -58,7 +58,7 @@ int main() {
   vm.setService<lowvm::StepOnInterface>(0, &debugger);
   vm.setService<lowvm::StepOffInterface>(0, &debugger);
   vm.setService<lowvm::HaltInterface>(0, &debugger);
-  vm.setService<lowvm::StepOnInterface>(1, &interpreter);
+  vm.setService<lowvm::InstructionSetProvider>(0, &interpreter);
   vm.setService<lowvm::ServeInterface>(0, &memory_unit);
 
   do { vm.step(); } while (!vm.isHalted());

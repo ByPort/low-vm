@@ -32,6 +32,11 @@ class StepOnInterface : virtual public Service {
   virtual void stepOn(VM* context, int index) = 0;
 };
 
+class InstructionSetProvider : virtual public Service {
+ public:
+  virtual bool exec(VM* context) = 0;
+};
+
 class StepOffInterface : virtual public Service {
  public:
   virtual void stepOff(VM* context, int index) = 0;

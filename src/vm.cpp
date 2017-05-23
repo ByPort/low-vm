@@ -28,10 +28,6 @@ void lowvm::VM::halt() {
   }
 }
 
-std::map<std::type_index, std::map<int, lowvm::Service*>>& lowvm::VM::getServices() {
-  return services;
-}
-
 lowvm::addr lowvm::VM::getIP() {
   return ip();
 }
@@ -80,6 +76,14 @@ void lowvm::VM::step() {
       std::distance(
         services[std::type_index(typeid(StepOnInterface))].begin(),
         i));
+  }
+  {
+    auto i = getServices<InstructionSetProvider>().begin();
+    for (
+      ;
+      !dynamic_cast<InstructionSetProvider*>(i->second)->exec(this) && i != getServices<InstructionSetProvider>().end();
+      i++) continue;
+    if (i == getServices<InstructionSetProvider>().end()) interrupt(Interrupts::INVALID_INSTRUCTION);
   }
   for (
     auto i = services[std::type_index(typeid(StepOffInterface))].begin();

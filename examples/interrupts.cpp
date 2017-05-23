@@ -22,14 +22,13 @@ int main() {
     0xffffffff,
     0xffffffff,
     0xffffffff,
-    c(I::SRVV), 11,
+    c(I::MOVVA), 11, 100,
     c(O::HLT),
-    99,
-    14, 0,
-    18, 0xffffffff, 0xffffffff, 0xffffffff,
-    c(I::SRVV), 21,
+    0xffffffff, 0xffffffff, 0xffffffff, 17, 0,
+    21, 0xffffffff, 0xffffffff, 0xffffffff,
+    c(I::SRVV), 24,
     c(O::HLT),
-    1, 1, 'e', 'r', 'r', 'o', 'r', ':', ' ', 'i', 'n', 'v', 'a', 'l', 'i', 'd', ' ', 's', 'e', 'r', 'v', 'i', 'c', 'e', '\n', '\0',
+    1, 1, 'e', 'r', 'r', 'o', 'r', ':', ' ', 'b', 'a', 'd', ' ', 'm', 'e', 'm', 'o', 'r', 'y', '\n', '\0',
   };
 
   lowvm::MU memory_unit(memory, sizeof(memory) / sizeof(memory[0]));
@@ -40,7 +39,7 @@ int main() {
 
   vm.setService<lowvm::StepOnInterface>(0, &debugger);
   vm.setService<lowvm::HaltInterface>(0, &debugger);
-  vm.setService<lowvm::StepOnInterface>(1, &interpreter);
+  vm.setService<lowvm::InstructionSetProvider>(0, &interpreter);
   vm.setService<lowvm::ServeInterface>(0, &memory_unit);
   vm.setService<lowvm::ServeInterface>(1, &io);
 
