@@ -18,12 +18,16 @@ lowvm::MU* lowvm::VM::getMU() {
 }
 
 lowvm::cell& lowvm::VM::arg(size number) {
-  return (*memory_unit)[ip() + number];
+  return memory_unit->at(ip() + number);
 }
 
 void lowvm::VM::halt() {
   halted = true;
-  for (auto i = services[std::type_index(typeid(HaltInterface))].begin(); i != services[std::type_index(typeid(HaltInterface))].end(); i++) {
+  for (
+    auto i = services[std::type_index(typeid(HaltInterface))].begin();
+    i != services[std::type_index(typeid(HaltInterface))].end();
+    i++
+  ) {
     dynamic_cast<HaltInterface*>(i->second)->halt(this);
   }
 }
@@ -33,11 +37,11 @@ lowvm::addr lowvm::VM::getIP() {
 }
 
 lowvm::addr& lowvm::VM::ip() {
-  return (*memory_unit)[1];
+  return memory_unit->at(a(MainAddresses::IP));
 }
 
 lowvm::addr& lowvm::VM::sp() {
-  return (*memory_unit)[2];
+  return memory_unit->at(a(MainAddresses::SP));
 }
 
 bool lowvm::VM::isHalted() {
@@ -45,24 +49,28 @@ bool lowvm::VM::isHalted() {
 }
 
 void lowvm::VM::interrupt(lowvm::Interrupts iid) {
+  addr ip = memory_unit->at(a(MainAddresses::IP));
+  addr pageRecordAddr = memory_unit->getActivePageRecordAddr();
+  memory_unit->disablePage();
   addr base;
   addr intlist;
   cell intnum;
   for (
-    base = (*memory_unit)[4],
+    base = memory_unit->at(4),
     intlist = 0,
     intnum = static_cast<std::uint32_t>(iid);
-    (*memory_unit)[base + intlist] != 0 && intnum > 0;
+    intnum > 0;
     ++intlist, --intnum
   ) {
     if (intlist == 7) {
-      base = (*memory_unit)[base + intlist];
+      base = memory_unit->at(base + intlist);
       intlist = 0;
     }
   }
-  if ((*memory_unit)[base + intlist] == 0) throw;
-  (*memory_unit)[(*memory_unit)[2]] = (*memory_unit)[1];
-  (*memory_unit)[1] = (*memory_unit)[(*memory_unit)[base + intlist]];
+  memory_unit->at(memory_unit->at(a(MainAddresses::SP))) = ip;
+  memory_unit->at(a(MainAddresses::SP))--;
+  memory_unit->at(memory_unit->at(a(MainAddresses::SP))) = pageRecordAddr;
+  memory_unit->at(a(MainAddresses::IP)) = memory_unit->at(memory_unit->at(base + intlist));
 }
 
 void lowvm::VM::step() {
@@ -79,11 +87,13 @@ void lowvm::VM::step() {
   }
   {
     auto i = getServices<InstructionSetProvider>().begin();
-    for (
-      ;
-      !dynamic_cast<InstructionSetProvider*>(i->second)->exec(this) && i != getServices<InstructionSetProvider>().end();
+    for (;
+      !dynamic_cast<InstructionSetProvider*>(i->second)->exec(this) &&
+      i != getServices<InstructionSetProvider>().end();
       i++) continue;
-    if (i == getServices<InstructionSetProvider>().end()) interrupt(Interrupts::INVALID_INSTRUCTION);
+    if (i == getServices<InstructionSetProvider>().end()) {
+      interrupt(Interrupts::INVALID_INSTRUCTION);
+    }
   }
   for (
     auto i = services[std::type_index(typeid(StepOffInterface))].begin();

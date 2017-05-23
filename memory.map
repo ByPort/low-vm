@@ -2,23 +2,13 @@ header:
 00000000 __void__
 00000001 ip
 00000002 sp
-00000003 *seglist
+00000003 __reserved__
 00000004 *intlist
 00000005 __reserved__
 00000006 __reserved__
 00000007 __reserved__
 
-seglist:
-+00000000 *segrecord
-+00000001 *segrecord
-+00000002 *segrecord
-+00000003 *segrecord
-+00000004 *segrecord
-+00000005 *segrecord
-+00000006 *segrecord
-+00000007 *seglist
-
-segrecord:
+pagerecord:
 +00000000 *begin
 +00000001 size
 +00000002 flags

@@ -7,30 +7,36 @@
 #include <service.hpp>
 
 namespace lowvm {
-struct SegRecord {
-  addr begin;
-  size length;
-  cell flags;
-
-  SegRecord(addr begin, size length, cell flags)
-    : begin(begin)
-    , length(length)
-    , flags(flags)
-  {}
-};
-
 class MU : public ServeInterface {
-  cell* memory;
-  std::vector<SegRecord> active_segments;
+  struct PageRecord {
+    addr self;
+    addr* begin;
+    size* length;
+    cell* flags;
 
-  addr abs(addr virtual_address, int seg = 0);
+    PageRecord(addr self, addr* begin, size* length, cell* flags)
+      : self(self)
+      , begin(begin)
+      , length(length)
+      , flags(flags)
+    {}
+  };
+
+  cell* memory;
+  size length;
+  PageRecord* active_page = nullptr;
+
+  addr abs(addr virtual_address);
 
  public:
   MU(cell* pointer, size length);
 
   cell* getPointer();
   size getLength();
-  cell& operator[] (addr at);
+  cell& at(addr adr);
+  addr getActivePageRecordAddr();
+  void disablePage();
+  //cell& operator[] (addr at);
   void serve(VM* context, addr header);
 };
 }  // namespace lowvm

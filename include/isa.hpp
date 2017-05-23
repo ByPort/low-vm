@@ -5,10 +5,15 @@
 
 namespace lowvm {
 using addr = std::uint32_t;
-using virt = addr;
-using size = std::size_t;
+using size = std::uint32_t;
 using cell = std::uint32_t;
-using ptr = void*;
+
+enum class MainAddresses : addr {
+  VOID = 0,
+  IP = 1,
+  SP = 2,
+  INTLIST = 4,
+};
 
 enum class Interrupts : std::uint32_t {
   INVALID_SERVICE = 0,
@@ -20,6 +25,11 @@ enum class Interrupts : std::uint32_t {
 template <typename T>
 constexpr cell c(T from) {
   return static_cast<cell>(from);
+}
+
+template <typename T>
+constexpr cell a(T from) {
+  return static_cast<addr>(from);
 }
 
 namespace instructions {

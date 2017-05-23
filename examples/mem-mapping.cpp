@@ -26,7 +26,7 @@ int main() {
     0xffffffff,
     c(I::SRVV), 23,
     c(O::HLT),
-    0, 0, 0,
+    0, 0, 28, 80, 0xffffffff,
     0xffffffff,
     8,
     79,

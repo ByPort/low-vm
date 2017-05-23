@@ -12,13 +12,13 @@ void lowvm::Debugger::stepOn(lowvm::VM* context, int index) {
   std::clog << " IP: " << std::setw(8) << std::setfill('0')
   << context->getIP() << '\n'
   << "COM: " << std::setw(8) << std::setfill('0')
-  << (*context->getMU())[context->getIP()] << '\n';
+  << context->getMU()->at(context->getIP()) << '\n';
   std::clog << "MEM: " << '\n';
   for (lowvm::addr i = 0; i < (*context->getMU()).getLength(); i++) {
     if (i % 4 == 0)
       std::clog << std::setfill('0') << std::setw(8) << i << " : ";
     std::clog << std::setfill('0') << std::setw(8)
-    << (*context->getMU())[i] << " ";
+    << context->getMU()->at(i) << " ";
     if (i % 4 == 3)
       std::clog << '\n';
   }

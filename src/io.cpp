@@ -6,25 +6,25 @@
 #include <memory.hpp>
 
 void lowvm::IO::serve(lowvm::VM* context, lowvm::addr header) {
-  switch ((*context->getMU())[header + 1]) {
+  switch (context->getMU()->at(header + 1)) {
     case 0: {
-      std::cout << static_cast<char>((*context->getMU())[header + 2]);
+      std::cout << static_cast<char>(context->getMU()->at(header + 2));
       break;
     }
     case 1: {
       for (
         lowvm::addr i = header + 2;
-        static_cast<char>((*context->getMU())[i]) != '\0';
+        static_cast<char>(context->getMU()->at(i)) != '\0';
         i++
       ) {
-        std::cout << static_cast<char>((*context->getMU())[i]);
+        std::cout << static_cast<char>(context->getMU()->at(i));
       }
       break;
     }
     case 2: {
       char ch;
       std::cin >> ch;
-      (*context->getMU())[header + 2] = ch;
+      context->getMU()->at(header + 2) = ch;
       break;
     }
     case 3: {
@@ -32,8 +32,8 @@ void lowvm::IO::serve(lowvm::VM* context, lowvm::addr header) {
       std::cin >> s;
       std::copy(
         s.begin(),
-        s.begin() + (*context->getMU())[header + 2],
-        &(*context->getMU())[header + 3]);
+        s.begin() + context->getMU()->at(header + 2),
+        &context->getMU()->at(header + 3));
     }
   }
 }
